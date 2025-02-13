@@ -4,11 +4,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { BackButtonLink, SubmitButton } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,16 +22,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader, PageHeaderTitle } from "@/components/PageHeader";
-import { Account, AccountType, Currency } from "@/data/types";
+import { Currency } from "@/data/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, ChevronLeft, PlusCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { db } from "@/data/db";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
-import Link from "next/link";
+import CurrencyFormField from "@/components/FormFields/CurrencyFormField";
+import AmountFormField from "@/components/FormFields/AmountFormField";
+import { Account, AccountType } from "@/data/account.types";
 
-// Define the Zod schema
-const AccountSchema = z.object({
+const FormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   accountNumber: z.string().min(1, "Account number is required"),
   routingNumber: z
@@ -44,7 +44,7 @@ const AccountSchema = z.object({
   creditLimit: z.number().optional(),
 });
 
-type AccountFormValues = z.infer<typeof AccountSchema>;
+type FormValues = z.infer<typeof FormSchema>;
 
 export default function AddAccount() {
   const router = useRouter();
@@ -52,8 +52,8 @@ export default function AddAccount() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const form = useForm<AccountFormValues>({
-    resolver: zodResolver(AccountSchema),
+  const form = useForm<FormValues>({
+    resolver: zodResolver(FormSchema),
     defaultValues: {
       name: "",
       accountNumber: "",
@@ -64,13 +64,15 @@ export default function AddAccount() {
     },
   });
 
-  const onSubmit = async (data: AccountFormValues) => {
+  const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
 
     const enhancedData = {
       ...data,
       transactions: [],
       id: uuidv4(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     const validatedData = Account.safeParse(enhancedData);
@@ -87,7 +89,7 @@ export default function AddAccount() {
     try {
       await db.accounts.add(validatedData.data);
 
-      router.push("/");
+      router.push("/accounts");
       setIsSubmitting(false);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Neznámá chyba");
@@ -100,10 +102,7 @@ export default function AddAccount() {
       <PageHeader>
         <PageHeaderTitle>Přidat účet</PageHeaderTitle>
 
-        <Link className={buttonVariants({ variant: "link" })} href="/accounts">
-          <ChevronLeft className="h-4 w-4" />
-          Zpět na účty
-        </Link>
+        <BackButtonLink href={"/accounts"}>Zpět na účty</BackButtonLink>
       </PageHeader>
 
       {errorMessage && (
@@ -114,7 +113,7 @@ export default function AddAccount() {
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
             name="name"
@@ -166,6 +165,7 @@ export default function AddAccount() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Typ účtu</FormLabel>
+
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -175,72 +175,35 @@ export default function AddAccount() {
                         <SelectValue placeholder="Vyber typ účtu" />
                       </SelectTrigger>
                     </FormControl>
+
                     <SelectContent>
                       <SelectItem value="debit">Běžný</SelectItem>
+
                       <SelectItem value="savings">Spořicí</SelectItem>
+
                       <SelectItem value="credit_card">
                         Kreditní karta
                       </SelectItem>
+
+                      <SelectItem value="prepaid_card">
+                        Předplacená karta
+                      </SelectItem>
                     </SelectContent>
                   </Select>
+
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Měna účtu</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Vyber měnu účtu" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="CZK">CZK</SelectItem>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <CurrencyFormField control={form.control} name={"currency"} />
           </div>
 
-          <FormField
+          <AmountFormField
             control={form.control}
-            name="balance"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Počáteční zůstatek</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(
-                        isNaN(Number.parseFloat(e.target.value))
-                          ? ""
-                          : Number.parseFloat(e.target.value),
-                      )
-                    }
-                  />
-                </FormControl>
-                <FormDescription>
-                  Zadej počáteční zůstatek pro tento účet.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            name={"balance"}
+            label={"Počáteční zůstatek"}
+            description={"Zadej počáteční zůstatek pro tento účet."}
           />
 
           {form.watch("type") === "credit_card" && (
@@ -265,9 +228,9 @@ export default function AddAccount() {
               )}
             />
           )}
-          <Button type="submit" disabled={isSubmitting}>
+          <SubmitButton isSubmitting={isSubmitting}>
             {isSubmitting ? "Ukládám..." : "Uložit"}
-          </Button>
+          </SubmitButton>
         </form>
       </Form>
     </div>

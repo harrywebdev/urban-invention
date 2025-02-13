@@ -2,13 +2,13 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { formatMoney } from "@/lib/utils";
-import { AccountType, Currency, MoneyAmount } from "@/data/types";
+import { Currency, MoneyAmount } from "@/data/types";
+import { AccountType } from "@/data/account.types";
+import AccountIcon, { getAccountColorClass } from "@/components/AccountIcon";
 
 interface AccountCardProps {
   name: string;
@@ -30,18 +30,14 @@ export function AccountCard({
   creditLimit,
 }: AccountCardProps) {
   return (
-    <Card className="w-full">
+    <Card className={`w-full ${getAccountColorClass(type)}`}>
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-xl">{name}</CardTitle>
-          <Badge
-            variant={
-              type === AccountType.enum.credit_card ? "destructive" : "default"
-            }
-          >
-            {type}
-          </Badge>
-        </div>
+        <CardTitle className="text-xl flex items-center text-neutral-900 dark:text-neutral-50 gap-1.5 whitespace-nowrap overflow-hidden min-w-0 text-ellipsis">
+          <AccountIcon accountType={type} />
+
+          {name}
+        </CardTitle>
+
         <CardDescription>
           {accountNumber}/{routingNumber}
         </CardDescription>
@@ -56,14 +52,14 @@ export function AccountCard({
 
         {type === AccountType.enum.credit_card && creditLimit && (
           <p className="text-sm text-muted-foreground">
-            Credit Limit: ${formatMoney(creditLimit, currency)}
+            Limit: {formatMoney(creditLimit, currency)}
           </p>
         )}
       </CardContent>
 
-      <CardFooter>
-        <p className="text-sm text-gray-500">Last transaction: TODO</p>
-      </CardFooter>
+      {/*<CardFooter>*/}
+      {/*  <p className="text-sm text-gray-500">Last transaction: TODO</p>*/}
+      {/*</CardFooter>*/}
     </Card>
   );
 }

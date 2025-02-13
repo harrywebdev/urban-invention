@@ -7,9 +7,12 @@ import { buttonVariants } from "@/components/ui/button";
 import { AccountCard } from "@/components/AccountCard";
 import Link from "next/link";
 import { PageHeader, PageHeaderTitle } from "@/components/PageHeader";
+import EmptyState from "@/components/EmptyState";
 
 export default function Home() {
-  const accounts = useLiveQuery(() => db.accounts.toArray());
+  const accounts = useLiveQuery(() =>
+    db.accounts.orderBy("sequence").toArray(),
+  );
 
   return (
     <>
@@ -25,22 +28,26 @@ export default function Home() {
         </Link>
       </PageHeader>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {accounts?.map((account) => (
-          <AccountCard
-            key={account.id}
-            name={account.name}
-            accountNumber={account.accountNumber}
-            routingNumber={account.routingNumber}
-            type={account.type}
-            currency={account.currency}
-            balance={account.balance}
-            creditLimit={
-              account.type === "credit_card" ? account.creditLimit : undefined
-            }
-          />
-        ))}
-      </div>
+      {accounts?.length ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {accounts.map((account) => (
+            <AccountCard
+              key={account.id}
+              name={account.name}
+              accountNumber={account.accountNumber}
+              routingNumber={account.routingNumber}
+              type={account.type}
+              currency={account.currency}
+              balance={account.balance}
+              creditLimit={
+                account.type === "credit_card" ? account.creditLimit : undefined
+              }
+            />
+          ))}
+        </div>
+      ) : (
+        <EmptyState />
+      )}
     </>
   );
 }

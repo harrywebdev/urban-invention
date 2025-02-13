@@ -3,6 +3,9 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
+import { PropsWithChildren } from "react";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 dark:ring-offset-neutral-950 dark:focus-visible:ring-neutral-300",
@@ -56,3 +59,26 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button";
 
 export { Button, buttonVariants };
+
+type SubmitButtonProps = PropsWithChildren & {
+  isSubmitting?: boolean;
+};
+export const SubmitButton = ({ isSubmitting, children }: SubmitButtonProps) => {
+  return (
+    <Button type="submit" disabled={!!isSubmitting} className={"w-full"}>
+      {children}
+    </Button>
+  );
+};
+
+type BackButtonLinkProps = PropsWithChildren & {
+  href: string;
+};
+export const BackButtonLink = ({ href, children }: BackButtonLinkProps) => {
+  return (
+    <Link className={buttonVariants({ variant: "link" })} href={href}>
+      <ChevronLeft className="h-4 w-4" />
+      {children}
+    </Link>
+  );
+};

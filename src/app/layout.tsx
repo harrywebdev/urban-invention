@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import { GlobalDialog } from "@/components/GlobalDialog";
+import { SquareMenuIcon } from "lucide-react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,10 +30,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
       >
-        <div className="grid grid-rows-[20px_1fr_20px] items-start justify-items-stretch min-h-screen p-8 gap-8 sm:p-20 font-[family-name:var(--font-geist-sans)] max-w-[95%] sm:max-w-2xl md:max-w-3xl shadow-xl bg-white">
+        <div className="grid grid-rows-[20px_1fr_20px] items-start justify-items-stretch min-h-screen p-8 pt-6 sm:pt-8 gap-8 sm:p-20 font-[family-name:var(--font-geist-sans)] max-w-[90%] lg:max-w-3xl shadow-xl bg-white mx-auto">
           <header>
             <h1 className={"text-xl font-semibold text-gray-400"}>
-              <Link href="/">vrazovka_fin</Link>
+              <Link href="/">
+                <SquareMenuIcon className="h-4 w-4 inline-block mr-2" />
+                vrazovka_fin
+              </Link>
             </h1>
           </header>
 
@@ -47,6 +52,7 @@ export default function RootLayout({
             made with ♥️ by Harry
           </footer>
         </div>
+        <GlobalDialog />
       </body>
     </html>
   );
