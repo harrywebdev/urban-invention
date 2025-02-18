@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Control, FieldValues, Path } from "react-hook-form";
 
-import { TransactionType } from "@/data/transaction.types";
+import { TransactionType } from "@/data/types/transaction.types";
 
 type TransactionTypeFormFieldProps<T extends FieldValues> = {
   control: Control<T>;

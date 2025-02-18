@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader, PageHeaderTitle } from "@/components/PageHeader";
-import { Currency } from "@/data/types";
+import { Currency } from "@/data/types/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { db } from "@/data/db";
@@ -30,7 +30,7 @@ import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import CurrencyFormField from "@/components/FormFields/CurrencyFormField";
 import AmountFormField from "@/components/FormFields/AmountFormField";
-import { Account, AccountType } from "@/data/account.types";
+import { Account, AccountType } from "@/data/types/account.types";
 
 const FormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -98,141 +98,147 @@ export default function AddAccount() {
   };
 
   return (
-    <div className="container pb-4">
-      <PageHeader>
-        <PageHeaderTitle>Přidat účet</PageHeaderTitle>
+    <>
+      <div className={"lg:max-w-2xl"}>
+        <PageHeader>
+          <PageHeaderTitle>Přidat účet</PageHeaderTitle>
 
-        <BackButtonLink href={"/accounts"}>Zpět na účty</BackButtonLink>
-      </PageHeader>
+          <BackButtonLink href={"/accounts"}>Zpět na účty</BackButtonLink>
+        </PageHeader>
+      </div>
 
       {errorMessage && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
+        <div className={"lg:max-w-2xl"}>
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        </div>
       )}
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Jméno účtu</FormLabel>
-                <FormControl>
-                  <Input placeholder="" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className={"grid grid-cols-[2fr_1fr] gap-4 w-full"}>
+      <div className="container pb-4 lg:max-w-2xl">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="accountNumber"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Číslo účtu</FormLabel>
+                  <FormLabel>Jméno účtu</FormLabel>
                   <FormControl>
-                    <Input placeholder="12345678" {...field} />
+                    <Input placeholder="" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="routingNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Kód banky</FormLabel>
-                  <FormControl>
-                    <Input placeholder="XXXX" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className={"grid grid-cols-[2fr_1fr] gap-4 w-full"}>
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Typ účtu</FormLabel>
-
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+            <div className={"grid grid-cols-[2fr_1fr] gap-4 w-full"}>
+              <FormField
+                control={form.control}
+                name="accountNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Číslo účtu</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Vyber typ účtu" />
-                      </SelectTrigger>
+                      <Input placeholder="12345678" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                    <SelectContent>
-                      <SelectItem value="debit">Běžný</SelectItem>
+              <FormField
+                control={form.control}
+                name="routingNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kód banky</FormLabel>
+                    <FormControl>
+                      <Input placeholder="XXXX" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-                      <SelectItem value="savings">Spořicí</SelectItem>
+            <div className={"grid grid-cols-[2fr_1fr] gap-4 w-full"}>
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Typ účtu</FormLabel>
 
-                      <SelectItem value="credit_card">
-                        Kreditní karta
-                      </SelectItem>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Vyber typ účtu" />
+                        </SelectTrigger>
+                      </FormControl>
 
-                      <SelectItem value="prepaid_card">
-                        Předplacená karta
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                      <SelectContent>
+                        <SelectItem value="debit">Běžný</SelectItem>
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                        <SelectItem value="savings">Spořicí</SelectItem>
 
-            <CurrencyFormField control={form.control} name={"currency"} />
-          </div>
+                        <SelectItem value="credit_card">
+                          Kreditní karta
+                        </SelectItem>
 
-          <AmountFormField
-            control={form.control}
-            name={"balance"}
-            label={"Počáteční zůstatek"}
-            description={"Zadej počáteční zůstatek pro tento účet."}
-          />
+                        <SelectItem value="prepaid_card">
+                          Předplacená karta
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
 
-          {form.watch("type") === "credit_card" && (
-            <FormField
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <CurrencyFormField control={form.control} name={"currency"} />
+            </div>
+
+            <AmountFormField
               control={form.control}
-              name="creditLimit"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Limit kreditní karty</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="5000"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(Number.parseFloat(e.target.value))
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              name={"balance"}
+              label={"Počáteční zůstatek"}
+              description={"Zadej počáteční zůstatek pro tento účet."}
             />
-          )}
-          <SubmitButton isSubmitting={isSubmitting}>
-            {isSubmitting ? "Ukládám..." : "Uložit"}
-          </SubmitButton>
-        </form>
-      </Form>
-    </div>
+
+            {form.watch("type") === "credit_card" && (
+              <FormField
+                control={form.control}
+                name="creditLimit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Limit kreditní karty</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="5000"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(Number.parseFloat(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            <SubmitButton isSubmitting={isSubmitting}>
+              {isSubmitting ? "Ukládám..." : "Uložit"}
+            </SubmitButton>
+          </form>
+        </Form>
+      </div>
+    </>
   );
 }

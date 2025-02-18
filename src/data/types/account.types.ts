@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { AccountId, Currency, MoneyAmount, Timestamp } from "@/data/types";
+import {
+  AccountId,
+  Currency,
+  MoneyAmount,
+  Timestamp,
+} from "@/data/types/types";
 
 export const AccountType = z.enum([
   "debit",

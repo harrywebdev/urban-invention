@@ -7,7 +7,7 @@ import {
   PaymentOrderTransactionFormSchema,
   PaymentOrderTransactionFormValues,
 } from "@/data/forms/payment-order-transaction.form";
-import { PaymentOrderId } from "@/data/types";
+import { PaymentOrderId } from "@/data/types/types";
 import FormErrorMessage from "@/components/FormFields/FormErrorMessage";
 import TransactionTypeFormField from "@/components/FormFields/TransactionTypeFormField";
 import AmountFormField from "@/components/FormFields/AmountFormField";
@@ -24,8 +24,8 @@ import AccountPickerFormField from "@/components/FormFields/AccountPickerFormFie
 import { db } from "@/data/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import invariant from "tiny-invariant";
-import { PaymentOrderTransaction } from "@/data/payment-order-transaction.types";
-import { TransactionType } from "@/data/transaction.types";
+import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
+import { TransactionType } from "@/data/types/transaction.types";
 
 type PaymentOrderTransactionFormProps = {
   children: (form: ReactNode) => ReactNode;

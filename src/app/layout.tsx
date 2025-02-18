@@ -30,7 +30,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
       >
-        <div className="grid grid-rows-[20px_1fr_20px] items-start justify-items-stretch min-h-screen p-8 pt-6 sm:pt-8 gap-8 sm:p-20 font-[family-name:var(--font-geist-sans)] max-w-[90%] lg:max-w-3xl shadow-xl bg-white mx-auto">
+        <div className="grid grid-rows-[20px_1fr_20px] items-start justify-items-stretch min-h-screen p-8 pt-6 sm:pt-8 gap-8 sm:p-10 font-[family-name:var(--font-geist-sans)] max-w-[90%] shadow-xl bg-white mx-auto">
           <header>
             <h1 className={"text-xl font-semibold text-gray-400"}>
               <Link href="/">
@@ -40,7 +40,7 @@ export default function RootLayout({
             </h1>
           </header>
 
-          <main className="flex flex-col gap-2 md:gap-4 row-start-2 items-stretch">
+          <main className="flex flex-col gap-2 md:gap-4 row-start-2 items-stretch h-full min-w-0">
             {children}
           </main>
 

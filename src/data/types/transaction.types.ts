@@ -5,7 +5,7 @@ import {
   MoneyAmount,
   Timestamp,
   TransactionId,
-} from "@/data/types";
+} from "@/data/types/types";
 
 export const BaseTransaction = z.object({
   id: TransactionId,

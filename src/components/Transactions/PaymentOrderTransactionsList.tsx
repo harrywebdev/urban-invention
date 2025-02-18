@@ -1,16 +1,16 @@
 import { FC } from "react";
-import { TransactionType } from "@/data/transaction.types";
+import { TransactionType } from "@/data/types/transaction.types";
 import AccountBadge from "@/components/AccountBadge";
 import { transactionVariants } from "@/components/ui/transaction";
 import { formatTransactionMoney } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Trash2Icon } from "lucide-react";
-import { PaymentOrderTransaction } from "@/data/payment-order-transaction.types";
+import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
 import EmptyState from "@/components/EmptyState";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
-import { AccountId } from "@/data/types";
-import { Account } from "@/data/account.types";
+import { AccountId } from "@/data/types/types";
+import { Account } from "@/data/types/account.types";
 
 type PaymentOrderTransactionsListProps = {
   transactions: PaymentOrderTransaction[];

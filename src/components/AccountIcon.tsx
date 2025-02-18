@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { AccountType } from "@/data/account.types";
+import { AccountType } from "@/data/types/account.types";
 import {
   CoinsIcon,
   CreditCardIcon,

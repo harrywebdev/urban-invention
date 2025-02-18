@@ -1,6 +1,6 @@
 import * as z from "zod";
-import { PaymentOrder } from "@/data/payment-order.types";
-import { PaymentOrderTransaction } from "@/data/payment-order-transaction.types";
+import { PaymentOrder } from "@/data/types/payment-order.types";
+import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
 
 export const PaymentOrderFormSchema = z.object({
   description: PaymentOrder.shape.description,

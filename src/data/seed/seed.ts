@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/data/db";
-import { Account } from "@/data/account.types";
-import { PaymentOrder } from "@/data/payment-order.types";
-import { PaymentOrderId } from "@/data/types";
-import { PaymentOrderTransaction } from "@/data/payment-order-transaction.types";
+import { Account } from "@/data/types/account.types";
+import { PaymentOrder } from "@/data/types/payment-order.types";
+import { PaymentOrderId } from "@/data/types/types";
+import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
 
 // seed Accounts
 // format:

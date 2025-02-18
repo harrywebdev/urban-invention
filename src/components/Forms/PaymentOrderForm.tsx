@@ -1,3 +1,5 @@
+"use client";
+
 import { FC, useRef, useState } from "react";
 import FormErrorMessage from "@/components/FormFields/FormErrorMessage";
 import {
@@ -18,7 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import PaymentOrderTransactionForm from "@/components/Forms/PaymentOrderTransactionForm";
-import { PaymentOrderId } from "@/data/types";
+import { PaymentOrderId } from "@/data/types/types";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { db } from "@/data/db";
@@ -29,8 +31,8 @@ import {
   PaymentOrderFormSchema,
   PaymentOrderFormValues,
 } from "@/data/forms/payment-order.form";
-import { PaymentOrder } from "@/data/payment-order.types";
-import { PaymentOrderTransaction } from "@/data/payment-order-transaction.types";
+import { PaymentOrder } from "@/data/types/payment-order.types";
+import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
 import PaymentOrderTransactionsList from "@/components/Transactions/PaymentOrderTransactionsList";
 
 type PaymentOrderFormProps = unknown;

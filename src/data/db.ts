@@ -1,8 +1,8 @@
 import Dexie, { type EntityTable } from "dexie";
-import { Transaction } from "@/data/transaction.types";
-import { Account } from "@/data/account.types";
-import { PaymentOrder } from "@/data/payment-order.types";
-import { PaymentOrderTransaction } from "@/data/payment-order-transaction.types";
+import { Transaction } from "@/data/types/transaction.types";
+import { Account } from "@/data/types/account.types";
+import { PaymentOrder } from "@/data/types/payment-order.types";
+import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
 
 const db = new Dexie("VrazovkaFinDb") as Dexie & {
   accounts: EntityTable<

@@ -1,111 +1,72 @@
 "use client";
 
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/data/db";
-import { PlusCircle } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import Link from "next/link";
-import { PageHeader, PageHeaderTitle } from "@/components/PageHeader";
-import EmptyState from "@/components/EmptyState";
-import PaymentOrderTransactionsList from "@/components/Transactions/PaymentOrderTransactionsList";
-import { useMemo } from "react";
-import { PaymentOrderTransaction } from "@/data/payment-order-transaction.types";
-import { formatTransactionMoney } from "@/lib/utils";
-import { transactionVariants } from "@/components/ui/transaction";
-
-type Totals = {
-  income: number;
-  expense: number;
-};
+import { Columns3Icon, ListIcon, TableIcon } from "lucide-react";
+import { useState } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { PaymentOrderIndexPageHeader } from "@/components/PaymentOrders/PaymentOrderPageHeaders";
+import PaymentOrdersListView from "@/components/PaymentOrders/PaymentOrdersListView";
+import { usePaymentOrders } from "@/data/hooks/use-payment-orders";
+import PaymentOrdersTotals from "@/components/PaymentOrders/PaymentOrdersTotals";
+import Loader from "@/components/Loader";
+import PaymentOrdersColumnsView from "@/components/PaymentOrders/PaymentOrdersColumnsView";
+import PaymentOrdersTableView from "@/components/PaymentOrders/PaymentOrdersTableView";
 
 export default function Home() {
-  const paymentOrders = useLiveQuery(() =>
-    db.paymentOrders.orderBy("triggerOn").toArray(),
-  );
+  const { data: paymentOrders, isLoading } = usePaymentOrders();
 
-  // also get all the transactions for each payment order
-  const transactionIds = useMemo(
-    () => paymentOrders?.flatMap((po) => po.transactions) ?? [],
-    [paymentOrders],
-  );
-  const transactions = useLiveQuery(
-    () => db.paymentOrderTransactions.bulkGet(transactionIds),
-    [transactionIds],
-  );
+  const [presentingView, setPresentingView] = useState<
+    "list" | "accountColumns" | "table"
+  >("table");
 
-  const presentedPaymentOrders = useMemo(() => {
-    return paymentOrders?.map((po) => ({
-      ...po,
-      transactions: (transactions ?? []).filter(
-        (t) => t && t.paymentOrderId === po.id,
-      ) as PaymentOrderTransaction[],
-    }));
-  }, [paymentOrders, transactions]);
-
-  // summarize all income, expense and transfer transactions
-  const totals: Totals = (transactions ?? []).reduce(
-    (acc, tx) => {
-      // TODO: add currency/conversion
-      if (tx?.currency !== "CZK") {
-        return acc;
-      }
-
-      return {
-        income: acc.income + (tx && tx.type === "income" ? tx.amount : 0),
-        expense: acc.expense + (tx && tx.type === "expense" ? tx.amount : 0),
-      };
-    },
-    { income: 0, expense: 0 },
-  );
+  const transactions = paymentOrders.flatMap((po) => po.transactions);
 
   return (
     <>
-      <PageHeader>
-        <PageHeaderTitle>Platební příkazy</PageHeaderTitle>
+      <PaymentOrderIndexPageHeader />
 
-        <Link
-          className={buttonVariants({ variant: "link" })}
-          href="/payment_orders/add"
-        >
-          <PlusCircle className="h-4 w-4" />
-          Přidat příkaz
-        </Link>
-      </PageHeader>
-
-      <div>
-        <div className="flex justify-between px-2">
-          <div className={"font-semibold"}>
-            Suma příjmů:{" "}
-            <span className={`${transactionVariants({ variant: "income" })}`}>
-              {formatTransactionMoney(totals.income, "CZK", "income")}
-            </span>
-          </div>
-
-          <div className={"font-semibold"}>
-            Suma výdajů:{" "}
-            <span className={`${transactionVariants({ variant: "expense" })}`}>
-              {formatTransactionMoney(totals.expense, "CZK", "expense")}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {presentedPaymentOrders?.length ? (
-        <div className="space-y-6">
-          {presentedPaymentOrders.map((paymentOrder) => (
-            <div key={paymentOrder.id} className="border rounded-md">
-              <div className={"bg-neutral-50 p-4 border-b"}>
-                {paymentOrder.triggerOn}. den: {paymentOrder.description}
-              </div>
-
-              <PaymentOrderTransactionsList
-                transactions={paymentOrder.transactions}
-              />
-            </div>
-          ))}
-        </div>
+      {isLoading ? (
+        <Loader />
       ) : (
-        <EmptyState />
+        <>
+          <div className={"flex flex-col gap-4 items-start"}>
+            <PaymentOrdersTotals transactions={transactions} />
+
+            <div className={"border rounded-md flex items-center gap-1 p-1"}>
+              <ToggleGroup
+                type="single"
+                value={presentingView}
+                defaultValue={presentingView}
+                onValueChange={(value: "list" | "accountColumns") =>
+                  value ? setPresentingView(value) : null
+                }
+              >
+                <ToggleGroupItem value="list" aria-label="Seznam">
+                  <ListIcon className="h-4 w-4" />
+                </ToggleGroupItem>
+
+                <ToggleGroupItem value="accountColumns" aria-label="Kolonky">
+                  <Columns3Icon className="h-4 w-4" />
+                </ToggleGroupItem>
+
+                <ToggleGroupItem value="table" aria-label="Tabulka">
+                  <TableIcon className="h-4 w-4" />
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+          </div>
+
+          {presentingView === "list" ? (
+            <PaymentOrdersListView paymentOrders={paymentOrders} />
+          ) : null}
+
+          {presentingView === "accountColumns" ? (
+            <PaymentOrdersColumnsView paymentOrders={paymentOrders} />
+          ) : null}
+
+          {presentingView === "table" ? (
+            <PaymentOrdersTableView paymentOrders={paymentOrders} />
+          ) : null}
+        </>
       )}
     </>
   );

@@ -1,11 +1,17 @@
 import { z } from "zod";
-import { PaymentOrderId, PaymentOrderTransactionId } from "@/data/types";
+import {
+  AccountId,
+  MoneyAmount,
+  PaymentOrderId,
+  PaymentOrderTransactionId,
+} from "@/data/types/types";
 import {
   BaseTransaction,
   ExpenseTransaction,
   IncomeTransaction,
+  TransactionType,
   TransferTransaction,
-} from "@/data/transaction.types";
+} from "@/data/types/transaction.types";
 
 const BasePaymentOrderTransaction = BaseTransaction.omit({ date: true }).extend(
   {
@@ -39,8 +45,42 @@ export const PaymentOrderTransaction = z.discriminatedUnion("type", [
 ]);
 export type PaymentOrderTransaction = z.infer<typeof PaymentOrderTransaction>;
 
+export const PaymentOrderTransactionWithBalance = z.discriminatedUnion("type", [
+  BasePaymentOrderTransaction.extend({ balance: MoneyAmount }).merge(
+    IncomeTransaction,
+  ),
+  BasePaymentOrderTransaction.extend({ balance: MoneyAmount }).merge(
+    ExpenseTransaction,
+  ),
+  BasePaymentOrderTransaction.extend({ balance: MoneyAmount }).merge(
+    TransferTransaction,
+  ),
+]);
+export type PaymentOrderTransactionWithBalance = z.infer<
+  typeof PaymentOrderTransactionWithBalance
+>;
+
 export function isPaymentOrderTransactionWithFromAccount(
   tx: PaymentOrderTransaction,
 ): tx is ExpensePaymentOrderTransaction | TransferPaymentOrderTransaction {
   return tx.type === "expense" || tx.type === "transfer";
+}
+
+export function isPaymentOrderTransactionWithToAccount(
+  tx: PaymentOrderTransaction,
+): tx is IncomePaymentOrderTransaction | TransferPaymentOrderTransaction {
+  return tx.type === "income" || tx.type === "transfer";
+}
+
+export function forcePaymentOrderTransactionTypeWithoutTransfer(
+  transaction: PaymentOrderTransaction,
+  accountId: AccountId,
+) {
+  if (transaction.type === TransactionType.enum.transfer) {
+    return transaction.fromAccount === accountId
+      ? TransactionType.enum.expense
+      : TransactionType.enum.income;
+  }
+
+  return transaction.type;
 }

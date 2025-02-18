@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/form";
 import { Control, FieldValues, Path } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { Currency } from "@/data/types";
+import { Currency } from "@/data/types/types";
 
 type AmountFormFieldProps<T extends FieldValues> = {
   control: Control<T>;

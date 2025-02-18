@@ -16,7 +16,7 @@ import { Control, FieldValues, Path } from "react-hook-form";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/data/db";
 import { formatAccountNumber } from "@/lib/utils";
-import { AccountId, Currency } from "@/data/types";
+import { AccountId, Currency } from "@/data/types/types";
 import { forwardRef, ReactNode, Ref } from "react";
 
 type AccountPickerFormFieldProps<T extends FieldValues> = {

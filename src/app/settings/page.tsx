@@ -13,15 +13,23 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHeader>
-        <PageHeaderTitle>Nastavení</PageHeaderTitle>
-      </PageHeader>
+      <div className={"lg:max-w-2xl"}>
+        <PageHeader>
+          <PageHeaderTitle>Nastavení</PageHeaderTitle>
+        </PageHeader>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        <Button variant={"secondary"} size={"lg"} onClick={handleDbSeedOnclick}>
-          <DatabaseIcon className="h-4 w-4" />
-          DB seed
-        </Button>
+      <div className={"lg:max-w-2xl"}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <Button
+            variant={"secondary"}
+            size={"lg"}
+            onClick={handleDbSeedOnclick}
+          >
+            <DatabaseIcon className="h-4 w-4" />
+            DB seed
+          </Button>
+        </div>
       </div>
     </>
   );
