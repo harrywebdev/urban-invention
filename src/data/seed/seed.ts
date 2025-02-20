@@ -5,6 +5,35 @@ import { PaymentOrder } from "@/data/types/payment-order.types";
 import { PaymentOrderId } from "@/data/types/types";
 import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
 
+// seed Scenarios
+// format:
+// [
+//   {
+//     "id": "",
+//     "name": "",
+//   }
+// ]
+// see ../scenario.types.ts for type definition
+export const seedScenarios = async () => {
+  const scenariosData = (await import("./scenarios.json")).default;
+
+  const data = scenariosData.map((scenarioData) => ({
+    ...scenarioData,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }));
+
+  for (const scenario of data) {
+    const foundScenario = await db.scenarios
+      .where({ name: scenario.name })
+      .first();
+
+    if (!foundScenario) {
+      await db.scenarios.add(scenario);
+    }
+  }
+};
+
 // seed Accounts
 // format:
 // [
@@ -68,81 +97,101 @@ export const seedAccounts = async () => {
 //   }
 // ]
 // see ../payment-order.types.ts for type definition
+
+type PaymentOrdersSeedData = {
+  paymentOrder: PaymentOrder;
+  paymentOrderTransactions: PaymentOrderTransaction[];
+}[];
+
 export const seedPaymentOrders = async () => {
   const paymentOrdersData = (await import("./payment-orders.json")).default;
 
   // get all the accounts for the transactions
   const accounts = await db.accounts.toArray();
 
-  const data: {
-    paymentOrder: PaymentOrder;
-    paymentOrderTransactions: PaymentOrderTransaction[];
-  }[] = paymentOrdersData.map((paymentOrderData) => {
-    const paymentOrderId = PaymentOrderId.parse(uuidv4());
+  // get all scenarios - and seed these POs for all scenarios for now
+  const scenarios = await db.scenarios.toArray();
 
-    const paymentOrderTransactions = paymentOrderData.transactions.map(
-      (transactionData) => {
-        function getAccountIdFromAccountAndRoutingNumberAndCurrency(
-          number?: string | null,
-        ) {
-          if (number) {
-            const [accountNumber, routingNumber, currency] = number.split("/");
+  const data: PaymentOrdersSeedData = paymentOrdersData.reduce(
+    (acc, paymentOrderData) => {
+      scenarios.forEach((scenario) => {
+        const paymentOrderId = PaymentOrderId.parse(uuidv4());
 
-            return (
-              accounts.find(
-                (account) =>
-                  account.accountNumber === accountNumber &&
-                  account.routingNumber === routingNumber &&
-                  account.currency === currency,
-              )?.id ?? ""
-            );
-          }
+        const paymentOrderTransactions = paymentOrderData.transactions.map(
+          (transactionData) => {
+            function getAccountIdFromAccountAndRoutingNumberAndCurrency(
+              number?: string | null,
+            ) {
+              if (number) {
+                const [accountNumber, routingNumber, currency] =
+                  number.split("/");
 
-          return number;
-        }
+                return (
+                  accounts.find(
+                    (account) =>
+                      account.accountNumber === accountNumber &&
+                      account.routingNumber === routingNumber &&
+                      account.currency === currency,
+                  )?.id ?? ""
+                );
+              }
 
-        // fromAccount and toAccount are account numbers with routing numbers instead of IDs
-        // because in the seed data, we don't know the IDs
-        // so if they are present, we gotta swap them with corresponding IDs
-        const fromAccount = getAccountIdFromAccountAndRoutingNumberAndCurrency(
-          transactionData.fromAccount,
+              return number;
+            }
+
+            // fromAccount and toAccount are account numbers with routing numbers instead of IDs
+            // because in the seed data, we don't know the IDs
+            // so if they are present, we gotta swap them with corresponding IDs
+            const fromAccount =
+              getAccountIdFromAccountAndRoutingNumberAndCurrency(
+                transactionData.fromAccount,
+              );
+
+            const toAccount =
+              getAccountIdFromAccountAndRoutingNumberAndCurrency(
+                transactionData.toAccount,
+              );
+
+            return PaymentOrderTransaction.parse({
+              ...transactionData,
+              fromAccount,
+              toAccount,
+              id: uuidv4(),
+              paymentOrderId: paymentOrderId,
+              date: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            });
+          },
         );
 
-        const toAccount = getAccountIdFromAccountAndRoutingNumberAndCurrency(
-          transactionData.toAccount,
-        );
-
-        return PaymentOrderTransaction.parse({
-          ...transactionData,
-          fromAccount,
-          toAccount,
-          id: uuidv4(),
-          paymentOrderId: paymentOrderId,
-          date: new Date(),
+        const paymentOrder = PaymentOrder.parse({
+          ...paymentOrderData,
+          id: paymentOrderId,
+          scenarioId: scenario.id,
+          transactions: paymentOrderTransactions.map((pot) => pot.id),
           createdAt: new Date(),
           updatedAt: new Date(),
         });
-      },
-    );
 
-    const paymentOrder = PaymentOrder.parse({
-      ...paymentOrderData,
-      id: paymentOrderId,
-      transactions: paymentOrderTransactions.map((pot) => pot.id),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+        acc.push({ paymentOrder, paymentOrderTransactions });
+      });
 
-    return { paymentOrder, paymentOrderTransactions };
-  });
+      return acc;
+    },
+    [] as PaymentOrdersSeedData,
+  );
 
   for (const paymentOrder of data) {
     const foundPaymentOrder = await db.paymentOrders
-      .where({ description: paymentOrder.paymentOrder.description })
+      .where({
+        description: paymentOrder.paymentOrder.description,
+      })
       .filter(
         (po) =>
           po.transactions.length ===
-          paymentOrder.paymentOrder.transactions.length,
+            paymentOrder.paymentOrder.transactions.length &&
+          po.scenarioId === paymentOrder.paymentOrder.scenarioId,
       )
       .first();
 

@@ -22,3 +22,6 @@ export type PaymentOrderTransactionId = z.infer<
 
 export const PaymentOrderId = z.string().uuid();
 export type PaymentOrderId = z.infer<typeof PaymentOrderId>;
+
+export const ScenarioId = z.string().uuid();
+export type ScenarioId = z.infer<typeof ScenarioId>;

@@ -28,3 +28,11 @@ export function PaymentOrderCreatePageHeader() {
     </PageHeader>
   );
 }
+
+export function PaymentOrderSelectScenarioPageHeader() {
+  return (
+    <PageHeader>
+      <PageHeaderTitle>Vyber scénář</PageHeaderTitle>
+    </PageHeader>
+  );
+}

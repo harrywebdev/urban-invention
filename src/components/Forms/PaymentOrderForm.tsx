@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import PaymentOrderTransactionForm from "@/components/Forms/PaymentOrderTransactionForm";
-import { PaymentOrderId } from "@/data/types/types";
+import { PaymentOrderId, ScenarioId } from "@/data/types/types";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { db } from "@/data/db";
@@ -35,9 +35,11 @@ import { PaymentOrder } from "@/data/types/payment-order.types";
 import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
 import PaymentOrderTransactionsList from "@/components/Transactions/PaymentOrderTransactionsList";
 
-type PaymentOrderFormProps = unknown;
+type PaymentOrderFormProps = {
+  currentScenarioId: ScenarioId;
+};
 
-const PaymentOrderForm: FC<PaymentOrderFormProps> = () => {
+const PaymentOrderForm: FC<PaymentOrderFormProps> = ({ currentScenarioId }) => {
   const router = useRouter();
   const { openDialog, closeDialog } = useDialogStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,6 +70,7 @@ const PaymentOrderForm: FC<PaymentOrderFormProps> = () => {
     const enhancedData = {
       ...data,
       id: paymentOrderId.current,
+      scenarioId: currentScenarioId,
       validFrom: new Date(data.validFrom),
       transactions: data.transactions.map((transaction) => transaction.id),
       createdAt: new Date(),

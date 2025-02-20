@@ -4,6 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { GlobalDialog } from "@/components/GlobalDialog";
 import { SquareMenuIcon } from "lucide-react";
+import { ScenarioProvider } from "@/contexts/ScenarioContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,8 +41,8 @@ export default function RootLayout({
             </h1>
           </header>
 
-          <main className="flex flex-col gap-2 md:gap-4 row-start-2 items-stretch h-full min-w-0">
-            {children}
+          <main className="flex flex-col gap-4 row-start-2 items-stretch h-full min-w-0">
+            <ScenarioProvider>{children}</ScenarioProvider>
           </main>
 
           <footer

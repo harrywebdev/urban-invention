@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   PaymentOrderId,
   PaymentOrderTransactionId,
+  ScenarioId,
   Timestamp,
 } from "@/data/types/types";
 import {
@@ -11,6 +12,7 @@ import {
 
 export const PaymentOrder = z.object({
   id: PaymentOrderId,
+  scenarioId: ScenarioId,
   description: z.string().min(1),
   validFrom: Timestamp,
   triggerOn: z.number().min(1).max(28),

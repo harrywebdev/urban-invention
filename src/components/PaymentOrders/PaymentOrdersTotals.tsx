@@ -32,16 +32,18 @@ const PaymentOrdersTotals: FC<PaymentOrdersTotalsProps> = ({
   );
 
   return (
-    <div className="flex justify-between px-2 w-full">
-      <div className={"font-semibold"}>
-        Suma příjmů:{" "}
+    <div className="grid grid-cols-2 gap-2">
+      <div>Suma příjmů:</div>
+
+      <div className={"text-right"}>
         <span className={`${transactionVariants({ variant: "income" })}`}>
           {formatTransactionMoney(totals.income, "CZK", "income")}
         </span>
       </div>
 
-      <div className={"font-semibold"}>
-        Suma výdajů:{" "}
+      <div>Suma výdajů:</div>
+
+      <div className={"text-right"}>
         <span className={`${transactionVariants({ variant: "expense" })}`}>
           {formatTransactionMoney(totals.expense, "CZK", "expense")}
         </span>

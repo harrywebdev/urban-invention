@@ -10,9 +10,19 @@ import PaymentOrdersTotals from "@/components/PaymentOrders/PaymentOrdersTotals"
 import Loader from "@/components/Loader";
 import PaymentOrdersColumnsView from "@/components/PaymentOrders/PaymentOrdersColumnsView";
 import PaymentOrdersTableView from "@/components/PaymentOrders/PaymentOrdersTableView";
+import { useScenario } from "@/contexts/ScenarioContext";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/data/db";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const { data: paymentOrders, isLoading } = usePaymentOrders();
+  const { currentScenarioId, setCurrentScenarioId } = useScenario();
+  const currentScenario = useLiveQuery(
+    async () =>
+      currentScenarioId ? db.scenarios.get(currentScenarioId) : null,
+    [currentScenarioId],
+  );
 
   const [presentingView, setPresentingView] = useState<
     "list" | "accountColumns" | "table"
@@ -24,12 +34,47 @@ export default function Home() {
     <>
       <PaymentOrderIndexPageHeader />
 
-      {isLoading ? (
+      {isLoading || !currentScenario ? (
         <Loader />
       ) : (
         <>
           <div className={"flex flex-col gap-4 items-start"}>
-            <PaymentOrdersTotals transactions={transactions} />
+            <div
+              className={
+                "flex flex-col md:flex-row md:justify-between w-full gap-2"
+              }
+            >
+              <div
+                className={
+                  "p-3 rounded-md bg-neutral-100 gap-2 flex flex-col sm:items-start md:items-stretch"
+                }
+              >
+                <div
+                  className={"flex justify-start items-baseline gap-2 text-md"}
+                >
+                  <h3 className="font-semibold">Scénář:</h3>
+
+                  <div>{currentScenario.name}</div>
+                </div>
+
+                <Button
+                  variant={"outline"}
+                  size={"sm"}
+                  className={"h-7 text-xs"}
+                  onClick={() => setCurrentScenarioId(null)}
+                >
+                  Změnit scénář
+                </Button>
+              </div>
+
+              <div
+                className={
+                  "p-3 rounded-md bg-neutral-100 text-md font-semibold flex"
+                }
+              >
+                <PaymentOrdersTotals transactions={transactions} />
+              </div>
+            </div>
 
             <div className={"border rounded-md flex items-center gap-1 p-1"}>
               <ToggleGroup

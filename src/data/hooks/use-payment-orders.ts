@@ -7,13 +7,22 @@ import {
 import { usePaymentOrderTransactions } from "@/data/hooks/use-payment-order-transactions";
 import { useMemo } from "react";
 import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
+import { useScenario } from "@/contexts/ScenarioContext";
 
 export function usePaymentOrders(): {
   data: PaymentOrderWithTransactions[];
   isLoading: boolean;
 } {
-  const paymentOrders = useLiveQuery(() =>
-    db.paymentOrders.orderBy("triggerOn").toArray(),
+  const { currentScenarioId } = useScenario();
+
+  const paymentOrders = useLiveQuery(
+    async () =>
+      currentScenarioId
+        ? await db.paymentOrders
+            .where({ scenarioId: currentScenarioId })
+            .sortBy("triggerOn")
+        : [],
+    [currentScenarioId],
   );
 
   // also get all the transactions for each payment order
