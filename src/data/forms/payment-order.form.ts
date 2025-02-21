@@ -8,7 +8,19 @@ export const PaymentOrderFormSchema = z.object({
     .string()
     .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
   triggerOn: PaymentOrder.shape.triggerOn,
-  transactions: z.array(PaymentOrderTransaction).min(1),
+  transactions: z.array(PaymentOrderTransaction),
 });
 
 export type PaymentOrderFormValues = z.infer<typeof PaymentOrderFormSchema>;
+
+export const PaymentOrderEditFormSchema = z.object({
+  description: PaymentOrder.shape.description,
+  validFrom: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
+  triggerOn: PaymentOrder.shape.triggerOn,
+});
+
+export type PaymentOrderEditFormValues = z.infer<
+  typeof PaymentOrderEditFormSchema
+>;

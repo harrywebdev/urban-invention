@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { Currency, MoneyAmount } from "@/data/types/types";
+import { Currency, MoneyAmount, PaymentOrderId } from "@/data/types/types";
 import {
   ExpenseTransaction,
   IncomeTransaction,
@@ -7,6 +7,7 @@ import {
 } from "@/data/types/transaction.types";
 
 const BasePaymentOrderTransactionFormSchema = z.object({
+  paymentOrderId: PaymentOrderId,
   currency: Currency,
   amount: MoneyAmount.min(1, "Chybí částka"),
   description: z.string().min(1, "Chybí popis"),

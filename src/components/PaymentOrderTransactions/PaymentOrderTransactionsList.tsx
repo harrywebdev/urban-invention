@@ -7,10 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Trash2Icon } from "lucide-react";
 import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
 import EmptyState from "@/components/EmptyState";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/data/db";
 import { AccountId } from "@/data/types/types";
 import { Account } from "@/data/types/account.types";
+import { useAccounts } from "@/data/hooks/use-accounts";
 
 type PaymentOrderTransactionsListProps = {
   transactions: PaymentOrderTransaction[];
@@ -24,12 +23,12 @@ const PaymentOrderTransactionsList: FC<PaymentOrderTransactionsListProps> = ({
   showEmptyState = true,
 }) => {
   // lookup table for the PO transactions
-  const accounts = useLiveQuery(() => db.accounts.toArray());
+  const { data: accounts } = useAccounts();
   const findAccountById = (accountId: AccountId): Account | undefined =>
     accounts?.find((acc) => acc.id === accountId);
 
   if (transactions.length === 0) {
-    return showEmptyState ? <EmptyState /> : null;
+    return showEmptyState ? <EmptyState className={"p-2"} /> : null;
   }
 
   return (
@@ -37,43 +36,41 @@ const PaymentOrderTransactionsList: FC<PaymentOrderTransactionsListProps> = ({
       {transactions.map((transaction, index) => (
         <li
           key={transaction.id}
-          className={`flex items-stretch justify-between p-4 bg-neutral-50/20 rounded-md border-b`}
+          className={`grid grid-cols-2 gap-2 items-stretch justify-between p-4 bg-neutral-50/20 rounded-md border-b`}
         >
-          <span className={"flex flex-col space-y-2"}>
-            <span className={"pl-3 font-semibold"}>
-              {transaction.description}
-            </span>
-
-            <span className={"flex flex-row items-center gap-4"}>
-              {(transaction.type === TransactionType.enum.expense ||
-                transaction.type === TransactionType.enum.transfer) && (
-                <AccountBadge
-                  account={findAccountById(transaction.fromAccount)}
-                  transferIcon={"from"}
-                />
-              )}
-
-              {(transaction.type === TransactionType.enum.income ||
-                transaction.type === TransactionType.enum.transfer) && (
-                <AccountBadge
-                  account={findAccountById(transaction.toAccount)}
-                  transferIcon={"to"}
-                />
-              )}
-            </span>
+          <span className={"pl-3 font-semibold"}>
+            {transaction.description}
           </span>
 
-          <span className={"flex flex-col space-y-2 justify-between items-end"}>
-            <span
-              className={`font-semibold ${transactionVariants({ variant: transaction.type })}`}
-            >
-              {formatTransactionMoney(
-                transaction.amount,
-                transaction.currency,
-                transaction.type,
-              )}
-            </span>
+          <span
+            className={`text-right font-semibold ${transactionVariants({ variant: transaction.type })}`}
+          >
+            {formatTransactionMoney(
+              transaction.amount,
+              transaction.currency,
+              transaction.type,
+            )}
+          </span>
 
+          <span className={"flex flex-row items-center gap-4"}>
+            {(transaction.type === TransactionType.enum.expense ||
+              transaction.type === TransactionType.enum.transfer) && (
+              <AccountBadge
+                account={findAccountById(transaction.fromAccount)}
+                transferIcon={"from"}
+              />
+            )}
+
+            {(transaction.type === TransactionType.enum.income ||
+              transaction.type === TransactionType.enum.transfer) && (
+              <AccountBadge
+                account={findAccountById(transaction.toAccount)}
+                transferIcon={"to"}
+              />
+            )}
+          </span>
+
+          <span className={"flex flex-col space-y-2 justify-end items-end"}>
             {removeAction ? (
               <span className={"pb-1 block"}>
                 <Button

@@ -25,12 +25,12 @@ import { PageHeader, PageHeaderTitle } from "@/components/PageHeader";
 import { Currency } from "@/data/types/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { db } from "@/data/db";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import CurrencyFormField from "@/components/FormFields/CurrencyFormField";
 import AmountFormField from "@/components/FormFields/AmountFormField";
 import { Account, AccountType } from "@/data/types/account.types";
+import { createAccount } from "@/data/hooks/use-accounts";
 
 const FormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -87,7 +87,7 @@ export default function AddAccount() {
     // if that works, redirect to the accounts page
     // if it doesn't, show an error message
     try {
-      await db.accounts.add(validatedData.data);
+      await createAccount(validatedData.data);
 
       router.push("/accounts");
       setIsSubmitting(false);

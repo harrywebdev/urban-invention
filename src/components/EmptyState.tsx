@@ -1,17 +1,22 @@
 import { FC } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-type EmptyStateProps = unknown;
+type EmptyStateProps = {
+  className?: string;
+};
 
-const EmptyState: FC<EmptyStateProps> = () => {
+const EmptyState: FC<EmptyStateProps> = ({ className }) => {
   return (
-    <Alert variant="default" className="mb-6">
-      <InfoIcon className="h-4 w-4" />
-      <AlertDescription>
-        <p>Nic tu zatím není.</p>
-      </AlertDescription>
-    </Alert>
+    <div className={cn("mb-6", className)}>
+      <Alert variant="default">
+        <InfoIcon className="h-4 w-4" />
+        <AlertDescription>
+          <p>Nic tu zatím není.</p>
+        </AlertDescription>
+      </Alert>
+    </div>
   );
 };
 export default EmptyState;

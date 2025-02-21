@@ -13,18 +13,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Control, FieldValues, Path } from "react-hook-form";
-import { useScenarios } from "@/data/hooks/use-scenarios";
+import { usePaymentOrders } from "@/data/hooks/use-payment-orders";
 
-type ScenarioPickerFormFieldProps<T extends FieldValues> = {
+type PaymentOrderPickerFormFieldProps<T extends FieldValues> = {
   control: Control<T>;
   name: Path<T>;
 };
 
-const ScenarioPickerFormField = <T extends FieldValues>({
+const PaymentOrderPickerFormField = <T extends FieldValues>({
   control,
   name,
-}: ScenarioPickerFormFieldProps<T>) => {
-  const scenarios = useScenarios();
+}: PaymentOrderPickerFormFieldProps<T>) => {
+  const { data: paymentOrders } = usePaymentOrders();
 
   return (
     <FormField
@@ -33,7 +33,7 @@ const ScenarioPickerFormField = <T extends FieldValues>({
       render={({ field }) => {
         return (
           <FormItem>
-            <FormLabel>Scénář</FormLabel>
+            <FormLabel>Platební příkaz</FormLabel>
             <Select
               onValueChange={field.onChange}
               defaultValue={field.value}
@@ -46,15 +46,15 @@ const ScenarioPickerFormField = <T extends FieldValues>({
               </FormControl>
 
               <SelectContent>
-                {scenarios?.map((scenario) => (
-                  <SelectItem key={scenario.id} value={scenario.id}>
-                    {scenario.name}
+                {paymentOrders?.map((po) => (
+                  <SelectItem key={po.id} value={po.id}>
+                    {po.triggerOn}. {po.description}
                   </SelectItem>
                 ))}
 
-                {scenarios !== undefined && scenarios.length === 0 ? (
+                {paymentOrders !== undefined && paymentOrders.length === 0 ? (
                   <SelectItem disabled={true} value={"_disabled_"}>
-                    Žádné scénáře
+                    Žádné platební příkazy
                   </SelectItem>
                 ) : null}
               </SelectContent>
@@ -68,4 +68,4 @@ const ScenarioPickerFormField = <T extends FieldValues>({
   );
 };
 
-export default ScenarioPickerFormField;
+export default PaymentOrderPickerFormField;

@@ -5,9 +5,20 @@ import {
 } from "@/data/types/payment-order-transaction.types";
 import { transactionVariants } from "@/components/ui/transaction";
 import { formatTransactionMoney } from "@/lib/utils";
-import { AccountId, MoneyAmount } from "@/data/types/types";
+import { AccountId, MoneyAmount, PaymentOrderId } from "@/data/types/types";
+import { useDialogStore } from "@/stores/use-dialog.store";
+import {
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import PaymentOrderTransactionForm from "@/components/Forms/PaymentOrderTransactionForm";
+import { SubmitButton } from "../ui/button";
+import { updatePaymentOrderTransaction } from "@/data/hooks/use-payment-order-transactions";
 
 type PaymentOrderTransactionMiniCardProps = {
+  paymentOrderId: PaymentOrderId;
   paymentOrderTriggerOn: number;
   transaction: PaymentOrderTransaction;
   accountId: AccountId;
@@ -16,7 +27,15 @@ type PaymentOrderTransactionMiniCardProps = {
 
 const PaymentOrderTransactionMiniCard: FC<
   PaymentOrderTransactionMiniCardProps
-> = ({ paymentOrderTriggerOn, transaction, accountId, balance }) => {
+> = ({
+  paymentOrderId,
+  paymentOrderTriggerOn,
+  transaction,
+  accountId,
+  balance,
+}) => {
+  const { openDialog, closeDialog } = useDialogStore();
+
   const forcedType = forcePaymentOrderTransactionTypeWithoutTransfer(
     transaction,
     accountId,
@@ -50,10 +69,53 @@ const PaymentOrderTransactionMiniCard: FC<
       break;
   }
 
+  const handlePaymentOrderTransactionFormSubmit = async (
+    data: PaymentOrderTransaction,
+  ) => {
+    await updatePaymentOrderTransaction({
+      ...data,
+      updatedAt: new Date(),
+    });
+    closeDialog();
+  };
+
+  const handleOnClick = () =>
+    openDialog(
+      <>
+        <DialogHeader>
+          <DialogTitle>Upravit transakci</DialogTitle>
+
+          <DialogDescription className="sr-only">
+            Vyplňte formulář pro úpravu transakce
+          </DialogDescription>
+        </DialogHeader>
+
+        <PaymentOrderTransactionForm
+          paymentOrderId={paymentOrderId}
+          transaction={transaction}
+          handleSubmit={handlePaymentOrderTransactionFormSubmit}
+        >
+          {(form, isSubmitting) => (
+            <>
+              {form}
+
+              <DialogFooter className="sm:justify-start mt-6">
+                <SubmitButton isSubmitting={isSubmitting}>
+                  Uložit transakci
+                </SubmitButton>
+              </DialogFooter>
+            </>
+          )}
+        </PaymentOrderTransactionForm>
+      </>,
+    );
+
   return (
     <span
       key={transaction.id}
-      className={`flex flex-col gap-1 items-stretch justify-between p-4 bg-neutral-50/20 rounded-md border-b pr-8 relative`}
+      className={`flex flex-col gap-1 items-stretch justify-between p-4 bg-neutral-50/20 rounded-md border-b pr-8 relative pointer`}
+      role={"button"}
+      onClick={handleOnClick}
     >
       <span className={"text-sm line-clamp-2"}>
         {paymentOrderTriggerOn}. {transaction.description}

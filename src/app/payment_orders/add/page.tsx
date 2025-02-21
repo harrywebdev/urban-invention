@@ -1,3 +1,5 @@
+"use client";
+
 import PaymentOrderForm from "@/components/Forms/PaymentOrderForm";
 import { PaymentOrderCreatePageHeader } from "@/components/PaymentOrders/PaymentOrderPageHeaders";
 import { useScenario } from "@/contexts/ScenarioContext";

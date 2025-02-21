@@ -12,7 +12,7 @@ import Loader from "@/components/Loader";
 import AccountBadge from "@/components/AccountBadge";
 import { Account } from "@/data/types/account.types";
 import { filterPaymentOrderTransactionsByAccountId } from "@/data/hooks/use-payment-order-transactions";
-import PaymentOrderTransactionMiniCard from "@/components/Transactions/PaymentOrderTransactionMiniCard";
+import PaymentOrderTransactionMiniCard from "@/components/PaymentOrderTransactions/PaymentOrderTransactionMiniCard";
 
 type PaymentOrdersColumnsViewProps = {
   paymentOrders: PaymentOrderWithTransactions[];
@@ -93,6 +93,7 @@ const PaymentOrdersColumnsView: FC<PaymentOrdersColumnsViewProps> = ({
                 {po.transactions.map((transaction) => (
                   <PaymentOrderTransactionMiniCard
                     key={transaction.id}
+                    paymentOrderId={po.id}
                     paymentOrderTriggerOn={po.triggerOn}
                     transaction={transaction}
                     accountId={account.id}

@@ -1,18 +1,15 @@
 "use client";
 
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/data/db";
 import { PlusCircle } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { AccountCard } from "@/components/AccountCard";
 import Link from "next/link";
 import { PageHeader, PageHeaderTitle } from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
+import { useAccounts } from "@/data/hooks/use-accounts";
 
 export default function Home() {
-  const accounts = useLiveQuery(() =>
-    db.accounts.orderBy("sequence").toArray(),
-  );
+  const { data: accounts } = useAccounts();
 
   return (
     <>

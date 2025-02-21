@@ -17,12 +17,14 @@ import Loader from "@/components/Loader";
 import AccountBadge from "@/components/AccountBadge";
 import { Account } from "@/data/types/account.types";
 import { filterPaymentOrderTransactionsByAccountId } from "@/data/hooks/use-payment-order-transactions";
-import PaymentOrderTransactionMiniCard from "@/components/Transactions/PaymentOrderTransactionMiniCard";
+import PaymentOrderTransactionMiniCard from "@/components/PaymentOrderTransactions/PaymentOrderTransactionMiniCard";
 import { transactionVariants } from "@/components/ui/transaction";
 import { formatTransactionMoney } from "@/lib/utils";
+import PaymentOrderMiniCard from "@/components/PaymentOrders/PaymentOrderMiniCard";
 
 type PaymentOrdersTableViewProps = {
   paymentOrders: PaymentOrderWithTransactions[];
+  hasGroupsByPaymentOrders: boolean;
 };
 
 type PresentedRow = {
@@ -35,6 +37,7 @@ type PresentedRow = {
 
 const PaymentOrdersTableView: FC<PaymentOrdersTableViewProps> = ({
   paymentOrders,
+  hasGroupsByPaymentOrders,
 }) => {
   const transactions = useMemo(
     () => paymentOrders.flatMap((po) => po.transactions),
@@ -201,13 +204,50 @@ const PaymentOrdersTableView: FC<PaymentOrdersTableViewProps> = ({
     return <EmptyState />;
   }
 
+  let gridColsClass = "grid-cols-1";
+  switch (accounts.length) {
+    case 2:
+      gridColsClass = "grid-cols-2";
+      break;
+    case 3:
+      gridColsClass = "grid-cols-3";
+      break;
+    case 4:
+      gridColsClass = "grid-cols-4";
+      break;
+    case 5:
+      gridColsClass = "grid-cols-5";
+      break;
+    case 6:
+      gridColsClass = "grid-cols-6";
+      break;
+    case 7:
+      gridColsClass = "grid-cols-7";
+      break;
+    case 8:
+      gridColsClass = "grid-cols-8";
+      break;
+    case 9:
+      gridColsClass = "grid-cols-9";
+      break;
+    case 10:
+      gridColsClass = "grid-cols-10";
+      break;
+    case 11:
+      gridColsClass = "grid-cols-11";
+      break;
+    case 12:
+      gridColsClass = "grid-cols-12";
+      break;
+  }
+
   return (
     <div className="overflow-auto h-full max-w-full">
       <div className="h-full min-w-max">
         {tableRows.map((row) => (
           <div
             key={`day_${row.dayOfMonth}`}
-            className={"grid grid-cols-5 gap-2"}
+            className={`grid ${gridColsClass} gap-2`}
           >
             {row.columns.map((column, index) => (
               <div
@@ -228,7 +268,7 @@ const PaymentOrdersTableView: FC<PaymentOrdersTableViewProps> = ({
                       className={`text-sm font-semibold ${transactionVariants({ variant: column.account.balance > 0 ? "income" : column.account.balance === 0 ? "transfer" : "expense" })}`}
                     >
                       {formatTransactionMoney(
-                        column.account.balance,
+                        Math.abs(column.account.balance),
                         column.account.currency,
                         column.account.balance > 0
                           ? "income"
@@ -244,15 +284,24 @@ const PaymentOrdersTableView: FC<PaymentOrdersTableViewProps> = ({
                       <>
                         {column.paymentOrders.map((po) => (
                           <span key={po.id} className="flex flex-col">
-                            {po.transactions.map((transaction) => (
-                              <PaymentOrderTransactionMiniCard
-                                key={transaction.id}
-                                paymentOrderTriggerOn={po.triggerOn}
-                                transaction={transaction}
+                            {hasGroupsByPaymentOrders ? (
+                              <PaymentOrderMiniCard
+                                key={po.id}
+                                paymentOrder={po}
                                 accountId={column.account.id}
-                                balance={transaction.balance}
                               />
-                            ))}
+                            ) : (
+                              po.transactions.map((transaction) => (
+                                <PaymentOrderTransactionMiniCard
+                                  key={transaction.id}
+                                  paymentOrderId={po.id}
+                                  paymentOrderTriggerOn={po.triggerOn}
+                                  transaction={transaction}
+                                  accountId={column.account.id}
+                                  balance={transaction.balance}
+                                />
+                              ))
+                            )}
                           </span>
                         ))}
                       </>

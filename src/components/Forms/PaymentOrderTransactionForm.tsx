@@ -21,34 +21,56 @@ import {
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
 import AccountPickerFormField from "@/components/FormFields/AccountPickerFormField";
-import { db } from "@/data/db";
-import { useLiveQuery } from "dexie-react-hooks";
 import invariant from "tiny-invariant";
-import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
+import {
+  isPaymentOrderTransactionWithFromAccount,
+  isPaymentOrderTransactionWithToAccount,
+  PaymentOrderTransaction,
+} from "@/data/types/payment-order-transaction.types";
 import { TransactionType } from "@/data/types/transaction.types";
+import PaymentOrderPickerFormField from "@/components/FormFields/PaymentOrderPickerFormField";
+import { useAccounts } from "@/data/hooks/use-accounts";
 
 type PaymentOrderTransactionFormProps = {
-  children: (form: ReactNode) => ReactNode;
+  children: (form: ReactNode, isSubmitting: boolean) => ReactNode;
   paymentOrderId: PaymentOrderId;
-  onSuccess: (data: PaymentOrderTransaction) => void;
+  handleSubmit: (data: PaymentOrderTransaction) => Promise<void>;
+  transaction?: PaymentOrderTransaction;
 };
 
 const PaymentOrderTransactionForm: FC<PaymentOrderTransactionFormProps> = ({
   children,
   paymentOrderId,
-  onSuccess,
+  transaction,
+  handleSubmit,
 }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const accounts = useLiveQuery(() => db.accounts.toArray());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: accounts } = useAccounts();
   const fromAccountRef = useRef<HTMLButtonElement>(null);
   const toAccountRef = useRef<HTMLButtonElement>(null);
+
+  const isEditing = transaction !== undefined;
+
+  const defaultValueFromAccount =
+    transaction && isPaymentOrderTransactionWithFromAccount(transaction)
+      ? transaction.fromAccount
+      : undefined;
+
+  const defaultValueToAccount =
+    transaction && isPaymentOrderTransactionWithToAccount(transaction)
+      ? transaction.toAccount
+      : undefined;
 
   const form = useForm<PaymentOrderTransactionFormValues>({
     resolver: zodResolver(PaymentOrderTransactionFormSchema),
     defaultValues: {
-      amount: 0,
-      description: "",
-      fromAccount: "",
+      type: transaction ? transaction.type : undefined,
+      paymentOrderId: paymentOrderId,
+      amount: transaction ? transaction.amount : 0,
+      description: transaction ? transaction.description : "",
+      fromAccount: defaultValueFromAccount,
+      toAccount: defaultValueToAccount,
     },
   });
   const { control, watch } = form;
@@ -59,10 +81,10 @@ const PaymentOrderTransactionForm: FC<PaymentOrderTransactionFormProps> = ({
   const watchToAccount = watch("toAccount");
 
   const onSubmit = async (data: PaymentOrderTransactionFormValues) => {
+    setIsSubmitting(true);
     const enhancedData = {
       ...data,
-      id: uuidv4(),
-      paymentOrderId: paymentOrderId,
+      id: transaction ? transaction.id : uuidv4(),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -71,13 +93,16 @@ const PaymentOrderTransactionForm: FC<PaymentOrderTransactionFormProps> = ({
 
     if (!validatedData.success) {
       setErrorMessage(validatedData.error.errors[0].message);
+      setIsSubmitting(false);
       return;
     }
 
     try {
-      onSuccess(validatedData.data);
+      await handleSubmit(validatedData.data);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Neznámá chyba");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -147,13 +172,6 @@ const PaymentOrderTransactionForm: FC<PaymentOrderTransactionFormProps> = ({
     });
   };
 
-  // also, anytime fromAccount changes, reset the toAccount (the currency could've changed)
-  useEffect(() => {
-    if (watchFromAccount) {
-      form.setValue("toAccount", "");
-    }
-  }, [form, watchFromAccount]);
-
   const formContent = (
     <div className="container space-y-6">
       <FormErrorMessage errorMessage={errorMessage} />
@@ -184,6 +202,9 @@ const PaymentOrderTransactionForm: FC<PaymentOrderTransactionFormProps> = ({
               label={"Z účtu"}
               ref={fromAccountRef}
               onChange={() => {
+                // also, anytime fromAccount changes, reset the toAccount (the currency could've changed)
+                form.setValue("toAccount", "");
+
                 focusField(() => {
                   if (showToAccount) {
                     toAccountRef.current?.focus();
@@ -227,13 +248,26 @@ const PaymentOrderTransactionForm: FC<PaymentOrderTransactionFormProps> = ({
           </FormItem>
         )}
       />
+
+      {isEditing ? (
+        <PaymentOrderPickerFormField
+          control={control}
+          name={"paymentOrderId"}
+        />
+      ) : (
+        <FormField
+          control={control}
+          name={`paymentOrderId`}
+          render={({ field }) => <Input type={"hidden"} {...field} />}
+        />
+      )}
     </div>
   );
 
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        {children(formContent)}
+        {children(formContent, isSubmitting)}
       </form>
     </FormProvider>
   );

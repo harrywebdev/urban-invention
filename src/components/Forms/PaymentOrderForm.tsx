@@ -23,7 +23,6 @@ import PaymentOrderTransactionForm from "@/components/Forms/PaymentOrderTransact
 import { PaymentOrderId, ScenarioId } from "@/data/types/types";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { db } from "@/data/db";
 import { useRouter } from "next/navigation";
 import { useDialogStore } from "@/stores/use-dialog.store";
 import { v4 as uuidv4 } from "uuid";
@@ -33,7 +32,8 @@ import {
 } from "@/data/forms/payment-order.form";
 import { PaymentOrder } from "@/data/types/payment-order.types";
 import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
-import PaymentOrderTransactionsList from "@/components/Transactions/PaymentOrderTransactionsList";
+import PaymentOrderTransactionsList from "@/components/PaymentOrderTransactions/PaymentOrderTransactionsList";
+import { createPaymentOrder } from "@/data/hooks/use-payment-orders";
 
 type PaymentOrderFormProps = {
   currentScenarioId: ScenarioId;
@@ -89,18 +89,7 @@ const PaymentOrderForm: FC<PaymentOrderFormProps> = ({ currentScenarioId }) => {
     // if that works, redirect to the accounts page
     // if it doesn't, show an error message
     try {
-      await db.transaction(
-        "rw",
-        db.paymentOrders,
-        db.paymentOrderTransactions,
-        async () => {
-          // store the PO
-          await db.paymentOrders.add(paymentOrderData.data);
-
-          // store it's transactions
-          await db.paymentOrderTransactions.bulkAdd(data.transactions);
-        },
-      );
+      await createPaymentOrder(paymentOrderData.data, data.transactions);
 
       router.push("/payment_orders");
       setIsSubmitting(false);
@@ -110,7 +99,7 @@ const PaymentOrderForm: FC<PaymentOrderFormProps> = ({ currentScenarioId }) => {
     }
   };
 
-  const handlePaymentOrderTransactionFormSuccess = (
+  const handlePaymentOrderTransactionFormSubmit = async (
     data: PaymentOrderTransaction,
   ) => {
     append(data);
@@ -212,7 +201,7 @@ const PaymentOrderForm: FC<PaymentOrderFormProps> = ({ currentScenarioId }) => {
 
                       <PaymentOrderTransactionForm
                         paymentOrderId={paymentOrderId.current}
-                        onSuccess={handlePaymentOrderTransactionFormSuccess}
+                        handleSubmit={handlePaymentOrderTransactionFormSubmit}
                       >
                         {(form) => (
                           <>

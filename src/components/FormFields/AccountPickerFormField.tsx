@@ -13,11 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Control, FieldValues, Path } from "react-hook-form";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/data/db";
 import { formatAccountNumber } from "@/lib/utils";
 import { AccountId, Currency } from "@/data/types/types";
 import { forwardRef, ReactNode, Ref } from "react";
+import { useAccountsForPicker } from "@/data/hooks/use-accounts";
 
 type AccountPickerFormFieldProps<T extends FieldValues> = {
   control: Control<T>;
@@ -44,17 +43,10 @@ const AccountPickerFormField = <
   }: AccountPickerFormFieldProps<T>,
   ref: Ref<E>,
 ) => {
-  const accounts = useLiveQuery(async () => {
-    const records = await (limitByCurrency
-      ? db.accounts.where("currency").equals(limitByCurrency).toArray()
-      : db.accounts.toArray());
-
-    if (ignoreAccountId) {
-      return records.filter((account) => account.id !== ignoreAccountId);
-    }
-
-    return records;
-  }, [limitByCurrency, ignoreAccountId]);
+  const accounts = useAccountsForPicker({
+    limitByCurrency,
+    ignoreAccountId,
+  });
 
   return (
     <FormField
