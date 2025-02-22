@@ -3,7 +3,12 @@
 import { PageHeader, PageHeaderTitle } from "@/components/PageHeader";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { CogIcon, CreditCardIcon, SplitIcon } from "lucide-react";
+import {
+  ChartNoAxesCombinedIcon,
+  CogIcon,
+  CreditCardIcon,
+  SplitIcon,
+} from "lucide-react";
 
 export default function Home() {
   return (
@@ -15,10 +20,10 @@ export default function Home() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         <Link
           className={`${buttonVariants({ size: "lg", variant: "secondary" })}`}
-          href="/accounts"
+          href="/timeline"
         >
-          <CreditCardIcon className="h-4 w-4" />
-          Účty
+          <ChartNoAxesCombinedIcon className="h-4 w-4" />
+          Projekce
         </Link>
 
         <Link
@@ -27,6 +32,14 @@ export default function Home() {
         >
           <SplitIcon className="h-4 w-4" />
           Platební příkazy
+        </Link>
+
+        <Link
+          className={`${buttonVariants({ size: "lg", variant: "secondary" })}`}
+          href="/accounts"
+        >
+          <CreditCardIcon className="h-4 w-4" />
+          Účty
         </Link>
 
         <Link
