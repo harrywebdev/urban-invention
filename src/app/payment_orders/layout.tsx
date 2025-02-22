@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { useScenario } from "@/contexts/ScenarioContext";
-import PaymentOrderSelectScenarioPage from "@/components/PaymentOrders/PaymentOrderSelectScenarioPage";
+import SelectScenarioPage from "@/components/SelectScenarioPage";
 
 export default function PaymentOrderssLayout({
   children,
@@ -13,7 +13,7 @@ export default function PaymentOrderssLayout({
   const { currentScenarioId } = useScenario();
 
   if (!currentScenarioId) {
-    return <PaymentOrderSelectScenarioPage />;
+    return <SelectScenarioPage />;
   }
 
   return children;

@@ -7,22 +7,20 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import {
-  PaymentOrderSelectScenarioFormSchema,
-  PaymentOrderSelectScenarioFormValues,
-} from "@/data/forms/payment-order-select-scenario.form";
+  SelectScenarioFormSchema,
+  SelectScenarioFormValues,
+} from "@/data/forms/select-scenario.form";
 import ScenarioPickerFormField from "@/components/FormFields/ScenarioPickerFormField";
 import { useScenario } from "@/contexts/ScenarioContext";
 
-type PaymentOrderSelectScenarioFormProps = unknown;
+type SelectScenarioFormProps = unknown;
 
-const PaymentOrderSelectScenarioForm: FC<
-  PaymentOrderSelectScenarioFormProps
-> = () => {
+const SelectScenarioForm: FC<SelectScenarioFormProps> = () => {
   const router = useRouter();
   const { setCurrentScenarioId } = useScenario();
 
-  const form = useForm<PaymentOrderSelectScenarioFormValues>({
-    resolver: zodResolver(PaymentOrderSelectScenarioFormSchema),
+  const form = useForm<SelectScenarioFormValues>({
+    resolver: zodResolver(SelectScenarioFormSchema),
     defaultValues: {
       scenarioId: "",
     },
@@ -30,7 +28,7 @@ const PaymentOrderSelectScenarioForm: FC<
 
   const { control } = form;
 
-  const onSubmit = async (data: PaymentOrderSelectScenarioFormValues) => {
+  const onSubmit = async (data: SelectScenarioFormValues) => {
     setCurrentScenarioId(data.scenarioId);
     router.refresh();
   };
@@ -50,4 +48,4 @@ const PaymentOrderSelectScenarioForm: FC<
   );
 };
 
-export default PaymentOrderSelectScenarioForm;
+export default SelectScenarioForm;
