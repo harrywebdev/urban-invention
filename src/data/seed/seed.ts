@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { db } from "@/data/db";
+import { client } from "@/data/db/client";
 import { Account } from "@/data/types/account.types";
 import { PaymentOrder } from "@/data/types/payment-order.types";
 import { PaymentOrderId } from "@/data/types/types";
@@ -24,12 +24,12 @@ export const seedScenarios = async () => {
   }));
 
   for (const scenario of data) {
-    const foundScenario = await db.scenarios
+    const foundScenario = await client.scenarios
       .where({ name: scenario.name })
       .first();
 
     if (!foundScenario) {
-      await db.scenarios.add(scenario);
+      await client.scenarios.add(scenario);
     }
   }
 };
@@ -63,7 +63,7 @@ export const seedAccounts = async () => {
   );
 
   for (const account of data) {
-    const foundAccount = await db.accounts
+    const foundAccount = await client.accounts
       .where({
         accountNumber: account.accountNumber,
         routingNumber: account.routingNumber,
@@ -72,7 +72,7 @@ export const seedAccounts = async () => {
       .first();
 
     if (!foundAccount) {
-      await db.accounts.add(account);
+      await client.accounts.add(account);
     }
   }
 };
@@ -107,10 +107,10 @@ export const seedPaymentOrders = async () => {
   const paymentOrdersData = (await import("./payment-orders.json")).default;
 
   // get all the accounts for the transactions
-  const accounts = await db.accounts.toArray();
+  const accounts = await client.accounts.toArray();
 
   // get all scenarios - and seed these POs for all scenarios for now
-  const scenarios = await db.scenarios.toArray();
+  const scenarios = await client.scenarios.toArray();
 
   const data: PaymentOrdersSeedData = paymentOrdersData.reduce(
     (acc, paymentOrderData) => {
@@ -183,7 +183,7 @@ export const seedPaymentOrders = async () => {
   );
 
   for (const paymentOrder of data) {
-    const foundPaymentOrder = await db.paymentOrders
+    const foundPaymentOrder = await client.paymentOrders
       .where({
         description: paymentOrder.paymentOrder.description,
       })
@@ -196,13 +196,13 @@ export const seedPaymentOrders = async () => {
       .first();
 
     if (!foundPaymentOrder) {
-      await db.transaction(
+      await client.transaction(
         "rw",
-        db.paymentOrderTransactions,
-        db.paymentOrders,
+        client.paymentOrderTransactions,
+        client.paymentOrders,
         async () => {
-          await db.paymentOrders.add(paymentOrder.paymentOrder);
-          await db.paymentOrderTransactions.bulkAdd(
+          await client.paymentOrders.add(paymentOrder.paymentOrder);
+          await client.paymentOrderTransactions.bulkAdd(
             paymentOrder.paymentOrderTransactions,
           );
         },

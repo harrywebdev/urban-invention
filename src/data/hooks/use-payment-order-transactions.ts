@@ -1,6 +1,6 @@
 import { AccountId, PaymentOrderTransactionId } from "@/data/types/types";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/data/db";
+import { client } from "@/data/db/client";
 import {
   isPaymentOrderTransactionWithFromAccount,
   isPaymentOrderTransactionWithToAccount,
@@ -17,7 +17,7 @@ export function usePaymentOrderTransactions(
   isLoading: boolean;
 } {
   const transactions = useLiveQuery(
-    () => db.paymentOrderTransactions.bulkGet(transactionIds),
+    () => client.paymentOrderTransactions.bulkGet(transactionIds),
     [transactionIds],
   );
 
@@ -49,15 +49,15 @@ export const filterPaymentOrderTransactionsByAccountId =
     });
 
 export const updatePaymentOrderTransaction = (data: PaymentOrderTransaction) =>
-  db.transaction(
+  client.transaction(
     "rw",
-    db.paymentOrders,
-    db.paymentOrderTransactions,
+    client.paymentOrders,
+    client.paymentOrderTransactions,
     async () => {
       debug("updatePaymentOrderTransaction", data);
 
       // if the payment order ID changed, we need to remove it from the original and add it to the new one
-      const originalTransaction = await db.paymentOrderTransactions.get(
+      const originalTransaction = await client.paymentOrderTransactions.get(
         data.id,
       );
 
@@ -68,10 +68,12 @@ export const updatePaymentOrderTransaction = (data: PaymentOrderTransaction) =>
       );
 
       if (originalTransaction.paymentOrderId !== data.paymentOrderId) {
-        const originalPaymentOrder = await db.paymentOrders.get(
+        const originalPaymentOrder = await client.paymentOrders.get(
           originalTransaction.paymentOrderId,
         );
-        const newPaymentOrder = await db.paymentOrders.get(data.paymentOrderId);
+        const newPaymentOrder = await client.paymentOrders.get(
+          data.paymentOrderId,
+        );
 
         invariant(
           originalPaymentOrder,
@@ -82,18 +84,18 @@ export const updatePaymentOrderTransaction = (data: PaymentOrderTransaction) =>
           `PaymentOrder with ID ${data.paymentOrderId} not found`,
         );
 
-        await db.paymentOrders.update(originalPaymentOrder.id, {
+        await client.paymentOrders.update(originalPaymentOrder.id, {
           transactions: originalPaymentOrder.transactions.filter(
             (id) => id !== data.id,
           ),
         });
 
-        await db.paymentOrders.update(newPaymentOrder.id, {
+        await client.paymentOrders.update(newPaymentOrder.id, {
           transactions: [...newPaymentOrder.transactions, data.id],
         });
       }
 
       // update the transaction
-      await db.paymentOrderTransactions.put(data);
+      await client.paymentOrderTransactions.put(data);
     },
   );

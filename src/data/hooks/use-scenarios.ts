@@ -1,9 +1,9 @@
 import { useScenario } from "@/contexts/ScenarioContext";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/data/db";
+import { client } from "@/data/db/client";
 
 export function useScenarios() {
-  return useLiveQuery(() => db.scenarios.toArray(), []);
+  return useLiveQuery(() => client.scenarios.toArray(), []);
 }
 
 export function useCurrentScenario() {
@@ -11,7 +11,7 @@ export function useCurrentScenario() {
 
   return useLiveQuery(
     async () =>
-      currentScenarioId ? db.scenarios.get(currentScenarioId) : null,
+      currentScenarioId ? client.scenarios.get(currentScenarioId) : null,
     [currentScenarioId],
   );
 }

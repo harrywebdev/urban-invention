@@ -7,10 +7,27 @@ import {
   seedPaymentOrders,
   seedScenarios,
 } from "@/data/seed/seed";
-import { DatabaseIcon } from "lucide-react";
-import { db } from "@/data/db";
+import {
+  DatabaseIcon,
+  DatabaseZapIcon,
+  HardDriveDownloadIcon,
+  HardDriveUploadIcon,
+} from "lucide-react";
+import { client } from "@/data/db/client";
+import { exportDatabase } from "@/data/db/export-db";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useDialogStore } from "@/stores/use-dialog.store";
+import {
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { importDatabase } from "@/data/db/import-db";
 
 export default function SettingsPage() {
+  const { openDialog, closeDialog } = useDialogStore();
+
   const handleDbSeedOnclick = async () => {
     await seedScenarios();
     await seedAccounts();
@@ -21,10 +38,46 @@ export default function SettingsPage() {
 
   const handleDbDeleteOnClick = async () => {
     if (confirm("Opravdu chcete smazat všechna data?")) {
-      await db.delete();
+      await client.delete();
       alert("Hotovo!");
       window.location.reload();
     }
+  };
+
+  const handleDbExportOnclick = () => exportDatabase(client);
+
+  const handleDbImportOnclick = () => {
+    console.log(`handleDbImportOnclick`);
+    openDialog(
+      <>
+        <DialogHeader>
+          <DialogTitle>Importovat databázi</DialogTitle>
+
+          <DialogDescription className="sr-only">
+            Vyberte JSON soubor s exportovanou databází
+          </DialogDescription>
+        </DialogHeader>
+        <div>
+          <Label htmlFor="db_import">DB Import</Label>
+          <Input
+            id="db_import"
+            type="file"
+            placeholder={"DB Import"}
+            onChange={async (event) => {
+              if (
+                event.target instanceof HTMLInputElement &&
+                event.target.files &&
+                event.target.files.length
+              ) {
+                await importDatabase(client, event.target.files[0]);
+                alert("Hotovo!");
+                closeDialog();
+              }
+            }}
+          />
+        </div>
+      </>,
+    );
   };
 
   return (
@@ -40,10 +93,28 @@ export default function SettingsPage() {
           <Button
             variant={"secondary"}
             size={"lg"}
+            onClick={handleDbExportOnclick}
+          >
+            <HardDriveDownloadIcon className="h-4 w-4" />
+            DB Export
+          </Button>
+
+          <Button
+            variant={"secondary"}
+            size={"lg"}
+            onClick={handleDbImportOnclick}
+          >
+            <HardDriveUploadIcon className="h-4 w-4" />
+            DB Import
+          </Button>
+
+          <Button
+            variant={"secondary"}
+            size={"lg"}
             onClick={handleDbSeedOnclick}
           >
-            <DatabaseIcon className="h-4 w-4" />
-            DB seed
+            <DatabaseZapIcon className="h-4 w-4" />
+            DB Seed
           </Button>
 
           <Button
@@ -52,7 +123,7 @@ export default function SettingsPage() {
             onClick={handleDbDeleteOnClick}
           >
             <DatabaseIcon className="h-4 w-4" />
-            DB delete
+            DB Delete
           </Button>
         </div>
       </div>

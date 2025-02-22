@@ -5,7 +5,7 @@ import { PaymentOrder } from "@/data/types/payment-order.types";
 import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
 import { Scenario } from "@/data/types/scenario.types";
 
-const db = new Dexie("VrazovkaFinDb") as Dexie & {
+const client = new Dexie("VrazovkaFinDb") as Dexie & {
   scenarios: EntityTable<Scenario, "id">;
   accounts: EntityTable<
     Account,
@@ -17,7 +17,7 @@ const db = new Dexie("VrazovkaFinDb") as Dexie & {
 };
 
 // Schema declaration:
-db.version(1).stores({
+client.version(1).stores({
   scenarios: "id, name",
   accounts:
     "id, name, [accountNumber+routingNumber], iban, type, balance, currency, creditLimit, sequence",
@@ -29,4 +29,4 @@ db.version(1).stores({
     "id, paymentOrderId, date, amount, currency, description, type, fromAccount, toAccount",
 });
 
-export { db };
+export { client };

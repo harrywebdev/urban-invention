@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/data/db";
+import { client } from "@/data/db/client";
 import {
   PaymentOrder,
   PaymentOrderWithoutTransactions,
@@ -21,7 +21,7 @@ export function usePaymentOrders(): {
   const paymentOrders = useLiveQuery(
     async () =>
       currentScenarioId
-        ? await db.paymentOrders
+        ? await client.paymentOrders
             .where({ scenarioId: currentScenarioId })
             .sortBy("triggerOn")
         : [],
@@ -57,30 +57,32 @@ export const createPaymentOrder = async (
   data: PaymentOrder,
   transactions: PaymentOrderTransaction[],
 ) =>
-  db.transaction(
+  client.transaction(
     "rw",
-    db.paymentOrders,
-    db.paymentOrderTransactions,
+    client.paymentOrders,
+    client.paymentOrderTransactions,
     async () => {
       debug("createPaymentOrder", { data, transactions });
 
       // store the PO
-      await db.paymentOrders.add(data);
+      await client.paymentOrders.add(data);
 
       // store it's transactions
-      await db.paymentOrderTransactions.bulkAdd(transactions);
+      await client.paymentOrderTransactions.bulkAdd(transactions);
     },
   );
 
 export const deletePaymentOrder = async (id: PaymentOrderId) =>
-  db.transaction(
+  client.transaction(
     "rw",
-    db.paymentOrders,
-    db.paymentOrderTransactions,
+    client.paymentOrders,
+    client.paymentOrderTransactions,
     async () => {
       debug("deletePaymentOrder", id);
-      await db.paymentOrders.delete(id);
-      await db.paymentOrderTransactions.where({ paymentOrderId: id }).delete();
+      await client.paymentOrders.delete(id);
+      await client.paymentOrderTransactions
+        .where({ paymentOrderId: id })
+        .delete();
     },
   );
 
@@ -89,5 +91,5 @@ export const updatePaymentOrder = async (
   data: PaymentOrderWithoutTransactions,
 ) => {
   debug("updatePaymentOrder", data);
-  return db.paymentOrders.update(data.id, data);
+  return client.paymentOrders.update(data.id, data);
 };

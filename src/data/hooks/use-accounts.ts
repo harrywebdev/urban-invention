@@ -1,6 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { AccountId, Currency } from "@/data/types/types";
-import { db } from "@/data/db";
+import { client } from "@/data/db/client";
 import { Account } from "@/data/types/account.types";
 import { useMemo } from "react";
 
@@ -10,7 +10,9 @@ export function useAccounts(accountIds?: AccountId[]): {
 } {
   const accounts = useLiveQuery(
     () =>
-      accountIds ? db.accounts.bulkGet(accountIds) : db.accounts.toArray(),
+      accountIds
+        ? client.accounts.bulkGet(accountIds)
+        : client.accounts.toArray(),
     [accountIds],
   );
 
@@ -26,7 +28,7 @@ export function useAccounts(accountIds?: AccountId[]): {
   return { data: resultAccounts, isLoading: accounts === undefined };
 }
 
-export const createAccount = async (data: Account) => db.accounts.add(data);
+export const createAccount = async (data: Account) => client.accounts.add(data);
 
 type UseAccountsForPickerProps = {
   limitByCurrency?: Currency;
@@ -39,8 +41,8 @@ export const useAccountsForPicker = ({
 }: UseAccountsForPickerProps) => {
   return useLiveQuery(async () => {
     const records = await (limitByCurrency
-      ? db.accounts.where("currency").equals(limitByCurrency).toArray()
-      : db.accounts.toArray());
+      ? client.accounts.where("currency").equals(limitByCurrency).toArray()
+      : client.accounts.toArray());
 
     if (ignoreAccountId) {
       return records.filter((account) => account.id !== ignoreAccountId);
