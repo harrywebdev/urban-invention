@@ -21,6 +21,7 @@ export const PaymentOrder = z.object({
   scenarioId: ScenarioId,
   description: z.string().min(1),
   validFrom: PaymentOrderValidFrom,
+  // TODO: add `validTo` which can be nullable (up to now) or date (ends there)
   triggerOn: PaymentOrderTriggerOn,
   transactions: z.array(PaymentOrderTransactionId),
   createdAt: Timestamp,

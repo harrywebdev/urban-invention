@@ -138,7 +138,7 @@ const PaymentOrderForm: FC<PaymentOrderFormProps> = ({ currentScenarioId }) => {
                     <FormLabel>Platný od</FormLabel>
 
                     <FormControl>
-                      <Input type={"date"} placeholder="12345678" {...field} />
+                      <Input type={"date"} {...field} />
                     </FormControl>
 
                     <FormMessage />
