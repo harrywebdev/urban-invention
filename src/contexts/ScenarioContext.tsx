@@ -1,7 +1,14 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
-import { ScenarioId } from "@/data/types/types";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { CookieName, ScenarioId } from "@/data/types/types";
+import { setCookie, removeCookie } from "typescript-cookie";
 
 interface ScenarioContextType {
   currentScenarioId: ScenarioId | null;
@@ -14,12 +21,25 @@ const ScenarioContext = createContext<ScenarioContextType | undefined>(
 
 export const ScenarioProvider = ({
   children,
+  initialScenarioId,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
+  initialScenarioId: ScenarioId | null;
 }) => {
   const [currentScenarioId, setCurrentScenarioId] = useState<string | null>(
-    null,
+    initialScenarioId,
   );
+
+  // on client, when choice is made, save it to cookie
+  useEffect(() => {
+    if (currentScenarioId) {
+      setCookie(CookieName.enum.CurrentScenarioId, currentScenarioId, {
+        path: "/",
+      });
+    } else {
+      removeCookie(CookieName.enum.CurrentScenarioId);
+    }
+  }, [currentScenarioId]);
 
   return (
     <ScenarioContext.Provider

@@ -25,3 +25,10 @@ export type PaymentOrderId = z.infer<typeof PaymentOrderId>;
 
 export const ScenarioId = z.string().uuid();
 export type ScenarioId = z.infer<typeof ScenarioId>;
+
+enum CookieNameEnum {
+  CurrentScenarioId = "fin_sim~scenarioId",
+}
+
+export const CookieName = z.nativeEnum(CookieNameEnum);
+export type CookieName = z.infer<typeof CookieName>;

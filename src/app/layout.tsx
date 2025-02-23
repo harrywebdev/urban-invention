@@ -5,6 +5,8 @@ import Link from "next/link";
 import { GlobalDialog } from "@/components/GlobalDialog";
 import { SquareMenuIcon } from "lucide-react";
 import { ScenarioProvider } from "@/contexts/ScenarioContext";
+import { cookies } from "next/headers";
+import { CookieName, ScenarioId } from "@/data/types/types";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,17 +23,27 @@ export const metadata: Metadata = {
   description: "Digital twin of Vrazovka IRL Fin",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookiesResource = await cookies();
+
+  const cookieScenarioId = ScenarioId.safeParse(
+    cookiesResource.get(CookieName.enum.CurrentScenarioId)?.value,
+  );
+
   return (
     <html lang="en" className={"light"}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
       >
-        <ScenarioProvider>
+        <ScenarioProvider
+          initialScenarioId={
+            cookieScenarioId.success ? cookieScenarioId.data : null
+          }
+        >
           <div className="grid grid-rows-[20px_1fr_20px] items-start justify-items-stretch min-h-screen p-8 pt-6 sm:pt-8 gap-8 sm:p-10 font-[family-name:var(--font-geist-sans)] max-w-[90%] shadow-xl bg-white mx-auto">
             <header>
               <h1 className={"text-xl font-semibold text-gray-400"}>
