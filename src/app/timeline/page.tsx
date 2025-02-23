@@ -66,12 +66,20 @@ export default function Timeline() {
         (t) => t.type === "income" || t.type === "expense",
       ),
     );
-    console.log(
-      `onlyIncomeOrExpenseTransactions`,
-      onlyIncomeOrExpenseTransactions,
-    );
 
-    setProjectionTransactions(onlyIncomeOrExpenseTransactions);
+    // get how many months there are between data.startsFrom and data.endsAt
+    const startsFrom = new Date(data.startsFrom);
+    const endsAt = new Date(data.endsAt);
+    const months =
+      (endsAt.getFullYear() - startsFrom.getFullYear()) * 12 +
+      (endsAt.getMonth() - startsFrom.getMonth());
+
+    const transactionsForProjection = Array.from(
+      { length: months },
+      (_, i) => onlyIncomeOrExpenseTransactions,
+    ).flatMap((txs) => txs);
+
+    setProjectionTransactions(transactionsForProjection);
 
     setHasSubmitted(true);
   };
