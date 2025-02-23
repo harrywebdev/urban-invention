@@ -26,11 +26,15 @@ export default function Timeline() {
   const { setCurrentScenarioId } = useScenario();
   const currentScenario = useCurrentScenario();
 
+  // ends at by default as now + 1 year
+  const defaultEndsAt = new Date();
+  defaultEndsAt.setFullYear(defaultEndsAt.getFullYear() + 1);
+
   const form = useForm({
     resolver: zodResolver(TimelineFormSchema),
     defaultValues: {
       startsFrom: new Date().toJSON().slice(0, 10),
-      endsAt: new Date().toJSON().slice(0, 10),
+      endsAt: defaultEndsAt.toJSON().slice(0, 10),
       accountBalance: 0,
     },
   });
