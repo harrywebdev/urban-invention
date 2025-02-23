@@ -17,14 +17,27 @@ import {
   TimelineFormSchema,
   TimelineFormValues,
 } from "@/data/forms/timeline.form";
-import { Button } from "@/components/ui/button";
+import { Button, SubmitButton } from "@/components/ui/button";
 import { useScenario } from "@/contexts/ScenarioContext";
 import { useCurrentScenario } from "@/data/hooks/use-scenarios";
 import Loader from "@/components/Loader";
+import { usePaymentOrders } from "@/data/hooks/use-payment-orders";
+import invariant from "tiny-invariant";
+import { useState } from "react";
+import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
+import ProjectionTotals from "@/components/Projection/ProjectionTotals";
 
 export default function Timeline() {
   const { setCurrentScenarioId } = useScenario();
   const currentScenario = useCurrentScenario();
+  const { data: paymentOrders, isLoading: isPaymentOrdersLoading } =
+    usePaymentOrders();
+
+  const [projectionTransactions, setProjectionTransactions] = useState<
+    PaymentOrderTransaction[]
+  >([]);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [projectionData, setProjectionData] = useState<TimelineFormValues>();
 
   // ends at by default as now + 1 year
   const defaultEndsAt = new Date();
@@ -40,11 +53,27 @@ export default function Timeline() {
   });
 
   const onSubmit = async (data: TimelineFormValues) => {
+    invariant(paymentOrders, "Payment orders are not loaded");
     console.log(`data`, data);
+
+    setProjectionData(data);
 
     // TODO: run through all scenario POs, get the transactions, ignore the transfer,
     //  calculate the monthly delta, and plot it on the chart
     //  don't forget to incldue the POs "validFrom" when calculating whether the PO is active
+    const onlyIncomeOrExpenseTransactions = paymentOrders.flatMap((po) =>
+      po.transactions.filter(
+        (t) => t.type === "income" || t.type === "expense",
+      ),
+    );
+    console.log(
+      `onlyIncomeOrExpenseTransactions`,
+      onlyIncomeOrExpenseTransactions,
+    );
+
+    setProjectionTransactions(onlyIncomeOrExpenseTransactions);
+
+    setHasSubmitted(true);
   };
 
   return (
@@ -53,7 +82,7 @@ export default function Timeline() {
         <PageHeaderTitle>Projekce</PageHeaderTitle>
       </PageHeader>
 
-      {!currentScenario ? (
+      {isPaymentOrdersLoading || !currentScenario ? (
         <Loader />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-[2fr_3fr] md:grid-cols-[1fr_2fr] gap-8">
@@ -127,16 +156,28 @@ export default function Timeline() {
                   currency={"CZK"}
                 />
 
-                <h2 className="text-lg font-semibold">Transakce</h2>
+                <SubmitButton>Spustit</SubmitButton>
+
+                {/*<h2 className="text-lg font-semibold">Transakce</h2>*/}
                 {/*  TODO: list all relevant txs (income, expense only) with checkboxes*/}
               </form>
             </Form>
           </div>
 
-          <div>
-            chart
-            {/*    chart*/}
-          </div>
+          {hasSubmitted && projectionData ? (
+            <div>
+              <div
+                className={
+                  "p-3 rounded-md bg-neutral-100 text-md font-semibold w-full"
+                }
+              >
+                <ProjectionTotals
+                  transactions={projectionTransactions}
+                  accountsBalance={projectionData.accountBalance}
+                />
+              </div>
+            </div>
+          ) : null}
         </div>
       )}
     </>
