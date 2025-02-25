@@ -4,16 +4,11 @@ import { formatTransactionMoney } from "@/lib/utils";
 import { MoneyAmount } from "@/data/types/types";
 import { Separator } from "@/components/ui/separator";
 import { Transaction } from "@/data/types/transaction.types";
+import { calculateTransactionBalance } from "@/lib/calc";
 
 type ProjectionTotalsProps = {
   transactions: Transaction[];
   accountsBalance: MoneyAmount;
-};
-
-type Totals = {
-  income: number;
-  expense: number;
-  balance: number;
 };
 
 const ProjectionTotals: FC<ProjectionTotalsProps> = ({
@@ -21,23 +16,9 @@ const ProjectionTotals: FC<ProjectionTotalsProps> = ({
   accountsBalance,
 }) => {
   // summarize all income, expense and transfer transactions
-  const totals: Totals = (transactions ?? []).reduce(
-    (acc, tx) => {
-      // TODO: add currency/conversion
-      if (tx?.currency !== "CZK") {
-        return acc;
-      }
-
-      const income = tx.type === "income" ? tx.amount : 0;
-      const expense = tx.type === "expense" ? tx.amount : 0;
-
-      return {
-        income: acc.income + income,
-        expense: acc.expense + expense,
-        balance: acc.balance + income - expense,
-      };
-    },
-    { income: 0, expense: 0, balance: accountsBalance },
+  const totals = calculateTransactionBalance(
+    accountsBalance,
+    transactions ?? [],
   );
 
   return (
