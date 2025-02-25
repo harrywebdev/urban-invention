@@ -72,11 +72,11 @@ const ProjectionTotalsChart: FC<ProjectionTotalsChartProps> = ({
         <XAxis
           dataKey="month"
           tickLine={false}
-          tickMargin={20}
-          axisLine={false}
+          tickMargin={30}
+          axisLine={true}
           tickFormatter={(value) => value}
-          angle={-45}
-          height={50}
+          angle={-90}
+          height={60}
         />
 
         <YAxis
