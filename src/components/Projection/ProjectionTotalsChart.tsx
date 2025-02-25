@@ -38,7 +38,6 @@ const ProjectionTotalsChart: FC<ProjectionTotalsChartProps> = ({
     const groupedByMonth = transactions.reduce(
       (acc, tx) => {
         const month = tx.date.toISOString().slice(0, 7);
-        console.log(`month`, month);
 
         if (!acc[month]) {
           acc[month] = {
@@ -54,8 +53,6 @@ const ProjectionTotalsChart: FC<ProjectionTotalsChartProps> = ({
       {} as Record<string, { txs: Transaction[]; month: string }>,
     );
 
-    // console.log(`groupedByMonth`, groupedByMonth);
-
     return Object.values(groupedByMonth).reduce((acc, txs) => {
       const startingBalance = acc[acc.length - 1]?.balance ?? accountsBalance;
 
@@ -67,8 +64,6 @@ const ProjectionTotalsChart: FC<ProjectionTotalsChartProps> = ({
       return acc;
     }, [] as ChartData);
   }, [transactions, accountsBalance]);
-
-  console.log(`chartData`, chartData);
 
   return (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full">

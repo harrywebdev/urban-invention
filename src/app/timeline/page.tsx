@@ -55,7 +55,6 @@ export default function Timeline() {
 
   const onSubmit = async (data: TimelineFormValues) => {
     invariant(paymentOrders, "Payment orders are not loaded");
-    console.log(`data`, data);
 
     setProjectionData(data);
 
