@@ -44,15 +44,18 @@ const ProjectionTotalsChart: FC<ProjectionTotalsChartProps> = () => {
         <XAxis
           dataKey="month"
           tickLine={false}
-          tickMargin={10}
+          tickMargin={20}
           axisLine={false}
           tickFormatter={(value) => value}
+          angle={-45}
+          height={50}
         />
 
         <YAxis
           dataKey={"balance"}
+          width={100}
           tickLine={false}
-          tickMargin={10}
+          tickMargin={0}
           axisLine={false}
           tickFormatter={(value) => formatMoney(value, Currency.enum.CZK)}
         />

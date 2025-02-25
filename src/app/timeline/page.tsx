@@ -186,7 +186,9 @@ export default function Timeline() {
                 />
               </div>
 
-              <ProjectionTotalsChart />
+              <div className={"py-4"}>
+                <ProjectionTotalsChart />
+              </div>
             </div>
           ) : null}
         </div>
