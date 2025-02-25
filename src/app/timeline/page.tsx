@@ -24,9 +24,9 @@ import Loader from "@/components/Loader";
 import { usePaymentOrders } from "@/data/hooks/use-payment-orders";
 import invariant from "tiny-invariant";
 import { useState } from "react";
-import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
 import ProjectionTotals from "@/components/Projection/ProjectionTotals";
 import ProjectionTotalsChart from "@/components/Projection/ProjectionTotalsChart";
+import { Transaction } from "@/data/types/transaction.types";
 
 export default function Timeline() {
   const { setCurrentScenarioId } = useScenario();
@@ -35,7 +35,7 @@ export default function Timeline() {
     usePaymentOrders();
 
   const [projectionTransactions, setProjectionTransactions] = useState<
-    PaymentOrderTransaction[]
+    Transaction[]
   >([]);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [projectionData, setProjectionData] = useState<TimelineFormValues>();
@@ -75,9 +75,11 @@ export default function Timeline() {
       (endsAt.getFullYear() - startsFrom.getFullYear()) * 12 +
       (endsAt.getMonth() - startsFrom.getMonth());
 
-    const transactionsForProjection = Array.from(
-      { length: months },
-      (_, i) => onlyIncomeOrExpenseTransactions,
+    const transactionsForProjection = Array.from({ length: months }, (_, i) =>
+      onlyIncomeOrExpenseTransactions.map((tx) => ({
+        ...tx,
+        date: new Date(startsFrom.setMonth(startsFrom.getMonth() + i)),
+      })),
     ).flatMap((txs) => txs);
 
     setProjectionTransactions(transactionsForProjection);

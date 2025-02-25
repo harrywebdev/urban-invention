@@ -1,12 +1,12 @@
 import { FC } from "react";
-import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
 import { transactionVariants } from "@/components/ui/transaction";
 import { formatTransactionMoney } from "@/lib/utils";
 import { MoneyAmount } from "@/data/types/types";
 import { Separator } from "@/components/ui/separator";
+import { Transaction } from "@/data/types/transaction.types";
 
 type ProjectionTotalsProps = {
-  transactions: PaymentOrderTransaction[];
+  transactions: Transaction[];
   accountsBalance: MoneyAmount;
 };
 
