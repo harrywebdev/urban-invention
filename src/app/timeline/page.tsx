@@ -59,15 +59,6 @@ export default function Timeline() {
 
     setProjectionData(data);
 
-    // TODO: run through all scenario POs, get the transactions, ignore the transfer,
-    //  calculate the monthly delta, and plot it on the chart
-    //  don't forget to incldue the POs "validFrom" when calculating whether the PO is active
-    const onlyIncomeOrExpenseTransactions = paymentOrders.flatMap((po) =>
-      po.transactions.filter(
-        (t) => t.type === "income" || t.type === "expense",
-      ),
-    );
-
     // get how many months there are between data.startsFrom and data.endsAt
     const startsFrom = new Date(data.startsFrom);
     const endsAt = new Date(data.endsAt);
@@ -75,11 +66,36 @@ export default function Timeline() {
       (endsAt.getFullYear() - startsFrom.getFullYear()) * 12 +
       (endsAt.getMonth() - startsFrom.getMonth());
 
+    // TODO: do not forget to include the POs "validFrom" when calculating whether the PO is active
+    const onlyIncomeOrExpenseTransactions: Transaction[] =
+      paymentOrders.flatMap((po) =>
+        po.transactions
+          .filter((t) => t.type === "income" || t.type === "expense")
+          .map((t) => {
+            // create tx date from the starting date and a day of PO's `triggerOn`
+            const date = new Date(startsFrom);
+            date.setDate(po.triggerOn);
+
+            return {
+              ...t,
+              date,
+            };
+          }),
+      );
+
     const transactionsForProjection = Array.from({ length: months }, (_, i) =>
-      onlyIncomeOrExpenseTransactions.map((tx) => ({
-        ...tx,
-        date: new Date(startsFrom.setMonth(startsFrom.getMonth() + i)),
-      })),
+      onlyIncomeOrExpenseTransactions.map((tx) => {
+        // take existing date but modify the month with current index
+        const thisMonthDate = new Date(tx.date);
+        thisMonthDate.setMonth(thisMonthDate.getMonth() + i);
+
+        console.log(`thisMonthDate`, thisMonthDate);
+
+        return {
+          ...tx,
+          date: thisMonthDate,
+        };
+      }),
     ).flatMap((txs) => txs);
 
     setProjectionTransactions(transactionsForProjection);
@@ -189,7 +205,10 @@ export default function Timeline() {
               </div>
 
               <div className={"py-4"}>
-                <ProjectionTotalsChart />
+                <ProjectionTotalsChart
+                  transactions={projectionTransactions}
+                  accountsBalance={projectionData.accountBalance}
+                />
               </div>
             </div>
           ) : null}

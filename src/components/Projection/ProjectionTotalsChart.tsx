@@ -1,33 +1,20 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { formatMoney } from "@/lib/utils";
-import { Currency } from "@/data/types/types";
+import { Currency, MoneyAmount } from "@/data/types/types";
+import { Transaction } from "@/data/types/transaction.types";
+import { calculateTransactionBalance } from "@/lib/calc";
 
 type ProjectionTotalsChartProps = {
-  //
+  transactions: Transaction[];
+  accountsBalance: MoneyAmount;
 };
-const chartData = [
-  { month: "2025-01", balance: 186 },
-  { month: "2025-02", balance: 305 },
-  { month: "2025-03", balance: 537 },
-  { month: "2025-04", balance: 730 },
-  { month: "2025-05", balance: 2090 },
-  { month: "2025-06", balance: 21400 },
-];
 
 const chartConfig = {
   balance: {
@@ -36,7 +23,53 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const ProjectionTotalsChart: FC<ProjectionTotalsChartProps> = () => {
+type ChartData = {
+  month: string;
+  balance: number;
+}[];
+
+const ProjectionTotalsChart: FC<ProjectionTotalsChartProps> = ({
+  transactions,
+  accountsBalance,
+}) => {
+  const chartData: ChartData = useMemo(() => {
+    // first, group transactions by month like YYYY-MM
+    // and then calculate the balance for each month
+    const groupedByMonth = transactions.reduce(
+      (acc, tx) => {
+        const month = tx.date.toISOString().slice(0, 7);
+        console.log(`month`, month);
+
+        if (!acc[month]) {
+          acc[month] = {
+            month,
+            txs: [],
+          };
+        }
+
+        acc[month].txs.push(tx);
+
+        return acc;
+      },
+      {} as Record<string, { txs: Transaction[]; month: string }>,
+    );
+
+    // console.log(`groupedByMonth`, groupedByMonth);
+
+    return Object.values(groupedByMonth).reduce((acc, txs) => {
+      const startingBalance = acc[acc.length - 1]?.balance ?? accountsBalance;
+
+      acc.push({
+        month: txs.month,
+        balance: calculateTransactionBalance(startingBalance, txs.txs).balance,
+      });
+
+      return acc;
+    }, [] as ChartData);
+  }, [transactions, accountsBalance]);
+
+  console.log(`chartData`, chartData);
+
   return (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
       <LineChart accessibilityLayer data={chartData}>
