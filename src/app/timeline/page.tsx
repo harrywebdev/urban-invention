@@ -26,6 +26,7 @@ import invariant from "tiny-invariant";
 import { useState } from "react";
 import { PaymentOrderTransaction } from "@/data/types/payment-order-transaction.types";
 import ProjectionTotals from "@/components/Projection/ProjectionTotals";
+import ProjectionTotalsChart from "@/components/Projection/ProjectionTotalsChart";
 
 export default function Timeline() {
   const { setCurrentScenarioId } = useScenario();
@@ -184,6 +185,8 @@ export default function Timeline() {
                   accountsBalance={projectionData.accountBalance}
                 />
               </div>
+
+              <ProjectionTotalsChart />
             </div>
           ) : null}
         </div>
